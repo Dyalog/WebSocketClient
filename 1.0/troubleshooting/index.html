@@ -1,0 +1,1445 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../userguide/">
+      
+      
+        <link rel="next" href="../partial/">
+      
+      
+      <link rel="icon" href="../img/favicon-32.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.15">
+    
+    
+      
+        <title>Troubleshooting - WebSocketClient</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.342714a4.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../css/print-site.css">
+    
+      <link rel="stylesheet" href="../css/print-site-material.css">
+    
+      <link rel="stylesheet" href="../css/main.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#websocket-handshake" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="WebSocketClient" class="md-header__button md-logo" aria-label="WebSocketClient" data-md-component="logo">
+      
+  <img src="../img/dyalog-white.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            WebSocketClient
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Troubleshooting
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/dyalog/websocketclient" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Dyalog/WebSocketClient
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="WebSocketClient" class="md-nav__button md-logo" aria-label="WebSocketClient" data-md-component="logo">
+      
+  <img src="../img/dyalog-white.svg" alt="logo">
+
+    </a>
+    WebSocketClient
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/dyalog/websocketclient" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Dyalog/WebSocketClient
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../userguide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Usage Guide
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Troubleshooting
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Troubleshooting
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+  
+
+<nav class="md-nav md-nav--secondary" aria-label="On this page">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      On this page
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#websocket-handshake" class="md-nav__link">
+    <span class="md-ellipsis">
+      WebSocket Handshake
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="WebSocket Handshake">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-is-sent" class="md-nav__link">
+    <span class="md-ellipsis">
+      What Is Sent
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-comes-back" class="md-nav__link">
+    <span class="md-ellipsis">
+      What Comes Back
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vetting-the-handshake-yourself" class="md-nav__link">
+    <span class="md-ellipsis">
+      Vetting the Handshake Yourself
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#redirections" class="md-nav__link">
+    <span class="md-ellipsis">
+      Redirections
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#when-the-handshake-fails-quietly" class="md-nav__link">
+    <span class="md-ellipsis">
+      When the Handshake Fails Quietly
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#when-a-connection-fails" class="md-nav__link">
+    <span class="md-ellipsis">
+      When a Connection Fails
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="When a Connection Fails">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#reading-the-message" class="md-nav__link">
+    <span class="md-ellipsis">
+      Reading the Message
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#where-to-look-next" class="md-nav__link">
+    <span class="md-ellipsis">
+      Where to Look Next
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#turning-off-the-safety-net" class="md-nav__link">
+    <span class="md-ellipsis">
+      Turning Off the Safety Net
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Advanced Usage
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Advanced Usage
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../partial/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Partial Messages
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../secure/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Secure Connections
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../conga/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Conga Usage
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../authentication/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Headers and Authentication
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../proxy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Connecting Through a Proxy
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Reference
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_1" id="__nav_5_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Settings
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_1">
+            <span class="md-nav__icon md-icon"></span>
+            Settings
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../settings-connect/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Connect-related settings
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../settings-proxy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Proxy-related settings
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../settings-conga/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Conga-related settings
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../settings-eventhooks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Event Hook settings
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../settings-websocket/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    WebSocket-specific settings
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../settings-status/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Status-related settings
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../public-methods/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Public Methods
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    About
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            About
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../license/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    License
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../release-notes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Release Notes
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../print_page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Print
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+  
+
+<nav class="md-nav md-nav--secondary" aria-label="On this page">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      On this page
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#websocket-handshake" class="md-nav__link">
+    <span class="md-ellipsis">
+      WebSocket Handshake
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="WebSocket Handshake">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-is-sent" class="md-nav__link">
+    <span class="md-ellipsis">
+      What Is Sent
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-comes-back" class="md-nav__link">
+    <span class="md-ellipsis">
+      What Comes Back
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vetting-the-handshake-yourself" class="md-nav__link">
+    <span class="md-ellipsis">
+      Vetting the Handshake Yourself
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#redirections" class="md-nav__link">
+    <span class="md-ellipsis">
+      Redirections
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#when-the-handshake-fails-quietly" class="md-nav__link">
+    <span class="md-ellipsis">
+      When the Handshake Fails Quietly
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#when-a-connection-fails" class="md-nav__link">
+    <span class="md-ellipsis">
+      When a Connection Fails
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="When a Connection Fails">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#reading-the-message" class="md-nav__link">
+    <span class="md-ellipsis">
+      Reading the Message
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#where-to-look-next" class="md-nav__link">
+    <span class="md-ellipsis">
+      Where to Look Next
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#turning-off-the-safety-net" class="md-nav__link">
+    <span class="md-ellipsis">
+      Turning Off the Safety Net
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+  <h1>Troubleshooting</h1>
+
+<p>This section describes in more depth the details of how <code>WebSocketClient</code> works.</p>
+<h2 id="websocket-handshake">WebSocket Handshake</h2>
+<p>A WebSocket connection begins life as an ordinary HTTP request. The client asks the
+server to change protocols, and a server willing to do so answers <code>101 Switching
+Protocols</code>; from that point the socket carries WebSocket frames rather than HTTP.
+<code>Connect</code> performs this exchange for you, but it is worth knowing what it sends, what
+it does with the answer, and where the answer is left for you to look at.</p>
+<h3 id="what-is-sent">What Is Sent</h3>
+<p>Conga composes the upgrade request, and <code>WebSocketClient</code> supplies three things to put
+in it: the path (the path from <a href="../settings-connect/#url"><code>URL</code></a>, plus a query string
+built from the URL's own and from <a href="../settings-connect/#params"><code>Params</code></a>), the host,
+and the headers.</p>
+<p>The headers are assembled in this order:</p>
+<ol>
+<li><a href="../settings-connect/#headers"><code>Headers</code></a>, as you have built it up with
+   <code>AddHeader</code>, <code>SetHeader</code>, and friends.</li>
+<li><code>Sec-WebSocket-Extensions</code> from <a href="../settings-websocket/#extensions"><code>Extensions</code></a>
+   and <code>Sec-WebSocket-Protocol</code> from <a href="../settings-websocket/#protocol"><code>Protocol</code></a> -
+   both added only if you have not set that header yourself.</li>
+<li><code>Authorization</code>, from <a href="../settings-connect/#auth"><code>Auth</code></a> and
+   <a href="../settings-connect/#authtype"><code>AuthType</code></a> if they are set (overwriting any
+   <code>Authorization</code> header you set directly), or from credentials embedded in the URL
+   if they are not.</li>
+<li><a href="../settings-connect/#headersubstitution"><code>HeaderSubstitution</code></a> is applied to the
+   result, replacing delimited environment-variable references with their values.</li>
+<li>Headers with empty values are dropped.</li>
+</ol>
+<p>Conga adds the protocol's own mandatory headers - <code>Upgrade</code>, <code>Connection</code>,
+<code>Sec-WebSocket-Key</code>, and <code>Sec-WebSocket-Version</code> - so you neither need to nor should
+set those yourself.</p>
+<h3 id="what-comes-back">What Comes Back</h3>
+<p><code>Connect</code> then waits <a href="../settings-conga/#waittime"><code>WaitTime</code></a> milliseconds for a
+single Conga event, and what arrives decides the outcome:</p>
+<table>
+<thead>
+<tr>
+<th>Event</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>WSUpgrade</code></td>
+<td>The server upgraded, and Conga has already validated the response (<a href="../settings-connect/#autoupgrade"><code>AutoUpgrade</code></a> is <code>1</code>)</td>
+</tr>
+<tr>
+<td><code>WSResponse</code></td>
+<td>The server responded and it is yours to validate (<code>AutoUpgrade</code> is <code>0</code>)</td>
+</tr>
+<tr>
+<td><code>HTTPHeader</code></td>
+<td>An ordinary HTTP response - a redirection, or a refusal</td>
+</tr>
+<tr>
+<td><code>Timeout</code></td>
+<td>Nothing arrived within <code>WaitTime</code>; <code>Connect</code> returns <code>100 'Conga connection timed out'</code></td>
+</tr>
+<tr>
+<td><code>Error</code></td>
+<td>Conga reported an error, which becomes the <code>rc</code></td>
+</tr>
+<tr>
+<td><code>Closed</code></td>
+<td>The server closed the socket instead of answering; <code>Connect</code> returns <code>'Socket closed by server'</code></td>
+</tr>
+</tbody>
+</table>
+<p>On either of the first two, the response is parsed into
+<a href="../settings-websocket/#wsupgraderesponse"><code>WSUpgradeResponse</code></a> before your hook sees
+it, and it stays there after <code>Connect</code> returns:</p>
+<pre><code>      ws.Connect
+0 Connected
+      ws.WSUpgradeResponse.(version status message)
+ HTTP/1.1  101  Switching Protocols
+      ws.WSUpgradeResponse.headers
+ upgrade               websocket
+ connection            Upgrade
+ sec-websocket-accept  vKfjfb62aH5uFI4KM/un/ixCh3k=
+ date                  Sat, 05 Sep 2026 19:01:09 GMT
+ server                Fly/ec1a4f957c (2026-08-31)
+      ws.WSUpgradeResponse.headers ws.GetHeader 'upgrade'
+websocket
+</code></pre>
+<p><code>status</code> is a number, <code>headers</code> is a 2-column matrix that
+<a href="../public-methods/#getheader"><code>GetHeader</code></a> will search for you when passed as its left
+argument, and <code>payload</code> holds anything that followed the headers - normally empty.
+<code>WSUpgradeResponse</code> is <code>''</code> if the handshake never got as far as a response.</p>
+<h3 id="vetting-the-handshake-yourself">Vetting the Handshake Yourself</h3>
+<p>Even with <code>AutoUpgrade</code> left at <code>1</code>, an <a href="../settings-eventhooks/#onwsupgrade"><code>OnWSUpgrade</code></a>
+hook gets to see the parsed response and can veto the connection by returning a
+non-zero <code>rc</code>, which <code>Connect</code> returns as its own result. This is where to check that
+the server agreed to what you asked for - a sub-protocol, most usefully, since a
+server is free to ignore the request and speak its own dialect instead:</p>
+<pre><code>     ∇ (rc msg)←client OnUpgrade response
+[1]   ⍝ refuse the connection unless the server agreed to our sub-protocol
+[2]    (rc msg)←0 ''
+[3]    :If 'chat'≢response.headers client.GetHeader 'sec-websocket-protocol'
+[4]        (rc msg)←¯1 'server did not accept the chat sub-protocol'
+[5]    :EndIf
+     ∇
+</code></pre>
+<pre><code>      ws.(Protocol OnWSUpgrade)←'chat' 'OnUpgrade'
+</code></pre>
+<p>Setting <code>AutoUpgrade</code> to <code>0</code> goes further: Conga hands over the response without
+validating it, <code>WebSocketClient</code> calls your
+<a href="../settings-eventhooks/#onwsresponse"><code>OnWSResponse</code></a> hook, and only if that returns
+<code>0</code> does it accept the upgrade. The hook is then responsible for whatever checking the
+<code>WSUpgrade</code> path would have done for you, so leave <code>AutoUpgrade</code> at <code>1</code> unless you
+have a specific reason not to.</p>
+<p>Both hooks run on the thread that called <code>Connect</code>, and errors in them are trapped -
+<code>Connect</code> returns <code>¯1</code> and a <code>msg</code> beginning <code>'Unexpected '</code> rather than suspending,
+unless <a href="../settings-connect/#debug"><code>Debug</code></a> is non-zero.</p>
+<h3 id="redirections">Redirections</h3>
+<p>A server that answers with <code>301</code>, <code>302</code>, <code>303</code>, <code>307</code>, or <code>308</code> arrives as an
+<code>HTTPHeader</code> event, and <code>Connect</code> starts again against the <code>Location</code> header - up to
+<a href="../settings-connect/#maxredirections"><code>MaxRedirections</code></a> times. Each hop is recorded
+in <a href="../settings-status/#redirections"><code>Redirections</code></a> as a namespace holding the <code>URL</code>
+that was tried and the response it produced, so a connection that ended up somewhere
+unexpected can be traced afterwards. A redirection without a <code>Location</code> header, or one
+too many hops, ends the attempt.</p>
+<p>Any other HTTP status is a refusal: <code>Connect</code> returns
+<code>¯1 'Unexpected server response: ...'</code> with the status and message, and
+<a href="../settings-status/#httpstatus"><code>HttpStatus</code></a>,
+<a href="../settings-status/#httpmessage"><code>HttpMessage</code></a>, and
+<a href="../settings-status/#httpheaders"><code>HttpHeaders</code></a> hold the response for inspection.</p>
+<h3 id="when-the-handshake-fails-quietly">When the Handshake Fails Quietly</h3>
+<p>Not every server that declines to upgrade says so in HTTP. Asking
+<code>echo.websocket.org</code> for a sub-protocol it does not support, for example, gets no
+response at all - the server simply closes the socket:</p>
+<pre><code>      ws.Protocol←'chat'
+      ws.Connect
+1119 Socket closed by server
+</code></pre>
+<p>and with a short <code>WaitTime</code> the same attempt ends as
+<code>100 'Conga connection timed out'</code> instead, because <code>Connect</code> gave up before the close
+arrived. Either result, with <code>WSUpgradeResponse</code> still <code>''</code>, points at the request
+rather than at the network: a header the server dislikes, a sub-protocol or extension
+it will not speak, or a path it does not serve WebSockets on.</p>
+<h2 id="when-a-connection-fails">When a Connection Fails</h2>
+<p><code>Connect</code> reports a failure rather than signalling one, so a connection that did not
+happen leaves you with a result to interpret and a set of status fields to read. The
+fields are described in <a href="../settings-status/">Status-related fields</a>; this section is
+about which of them to look at, and when.</p>
+<p><a href="../settings-status/#connected"><code>Connected</code></a> is the dependable test. <code>Connect</code>'s <code>rc</code>
+is <code>0</code> on success, but a handful of validation failures - a URL that cannot be parsed,
+headers that cannot be interpreted - currently report the problem in <code>msg</code> while
+leaving <code>rc</code> at <code>0</code>:</p>
+<pre><code>      ws.URL←'ftp://example.com'
+      ws.Connect
+0 Invalid protocol: ftp
+      ws.Connected
+0
+</code></pre>
+<p>So test <code>Connected</code> (or check that <code>msg</code> is <code>'Connected'</code>) rather than testing <code>rc</code>
+alone.</p>
+<h3 id="reading-the-message">Reading the Message</h3>
+<p>Failures fall into a few groups, and the message says which:</p>
+<table>
+<thead>
+<tr>
+<th>Message</th>
+<th>What went wrong</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>'No URL specified'</code><br/><code>'URL is not a simple character vector'</code><br/><code>'Headers are not character'</code><br/><code>'Improper header format'</code></td>
+<td>Settings were rejected before anything was attempted</td>
+</tr>
+<tr>
+<td><code>'Invalid protocol: ...'</code><br/><code>'No host specified'</code><br/><code>'Invalid host/port: ...'</code><br/><code>'Invalid port: ...'</code></td>
+<td>The URL could not be parsed</td>
+</tr>
+<tr>
+<td><code>'Could not initialize Conga ...'</code><br/><code>'neither Conga nor DRC were successfully copied'</code></td>
+<td>Conga could not be located - see <a href="../conga/#playing-nicely-with-others">Playing Nicely With Others</a></td>
+</tr>
+<tr>
+<td><code>'Conga failed to connect to "..." ...'</code></td>
+<td>The TCP or TLS connection never came up</td>
+</tr>
+<tr>
+<td><code>'Unexpected server response: ...'</code></td>
+<td>The server answered with HTTP rather than upgrading</td>
+</tr>
+<tr>
+<td><code>'Conga connection timed out'</code></td>
+<td>Nothing arrived within <a href="../settings-conga/#waittime"><code>WaitTime</code></a></td>
+</tr>
+<tr>
+<td><code>'Socket closed by server'</code></td>
+<td>The server closed the connection instead of answering</td>
+</tr>
+<tr>
+<td><code>'Unexpected ... at ...'</code></td>
+<td>A hook called from <code>Connect</code> signalled an error</td>
+</tr>
+</tbody>
+</table>
+<p>The connection-level messages carry Conga's own text, which is usually specific enough
+to act on:</p>
+<pre><code>      ws.URL←'wss://no-such-host.invalid' ⋄ ws.Connect
+1106 Conga failed to connect to &quot;no-such-host.invalid&quot;:  ERR_INVALID_HOST  Host identification not resolved
+      ws.URL←'ws://127.0.0.1:9' ⋄ ws.Connect
+1111 Conga failed to connect to &quot;127.0.0.1&quot;:  ERR_CONNECT_DATA  Unable to connect to host data port
+      ws.URL←'wss://expired.badssl.com' ⋄ ws.SSLFlags←0 ⋄ ws.Connect
+1202 Conga failed to connect to &quot;expired.badssl.com&quot;:  ERR_INVALID_PEER_CERTIFICATE  Remote certificate is invalid
+</code></pre>
+<p><code>ERR_INVALID_HOST</code> is a name that did not resolve, <code>ERR_CONNECT_DATA</code> a host that
+resolved but refused the connection, and <code>ERR_INVALID_PEER_CERTIFICATE</code> a certificate
+that failed the validation asked for by
+<a href="../settings-conga/#sslflags"><code>SSLFlags</code></a> - see <a href="../secure/">Secure Connections</a>.</p>
+<h3 id="where-to-look-next">Where to Look Next</h3>
+<p>Which field holds the detail depends on how far the attempt got:</p>
+<table>
+<thead>
+<tr>
+<th>Symptom</th>
+<th>Look at</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>The server answered with HTTP</td>
+<td><a href="../settings-status/#httpstatus"><code>HttpStatus</code></a>, <a href="../settings-status/#httpmessage"><code>HttpMessage</code></a>, <a href="../settings-status/#httpheaders"><code>HttpHeaders</code></a></td>
+</tr>
+<tr>
+<td>Conga could not parse the response as HTTP</td>
+<td><a href="../settings-status/#data"><code>Data</code></a>, which holds the unparsed event data</td>
+</tr>
+<tr>
+<td>The handshake completed but something about it was wrong</td>
+<td><a href="../settings-websocket/#wsupgraderesponse"><code>WSUpgradeResponse</code></a></td>
+</tr>
+<tr>
+<td>The connection ended up somewhere unexpected</td>
+<td><a href="../settings-status/#redirections"><code>Redirections</code></a></td>
+</tr>
+<tr>
+<td>A proxy is in use</td>
+<td><a href="../settings-proxy/#proxyresponse"><code>ProxyResponse</code></a> - see <a href="../proxy/#when-the-proxy-refuses">When the Proxy Refuses</a></td>
+</tr>
+<tr>
+<td>The connection was made and then died</td>
+<td><a href="../settings-status/#errorinfo"><code>ErrorInfo</code></a> and <a href="../settings-status/#lastwaitresponse"><code>LastWaitResponse</code></a></td>
+</tr>
+</tbody>
+</table>
+<p>A worked example of the third row - a server answering <code>200 OK</code> to an upgrade request
+because the path serves ordinary HTTP - looks like this:</p>
+<pre><code>      ws.URL←'wss://example.com'
+      ws.Connect
+¯1 Unexpected server response: 200  OK
+      ws.(HttpStatus HttpMessage)
+200  OK
+</code></pre>
+<p>Nothing is cleared when a connection ends, so all of these survive for as long as you
+need them; <code>Connect</code> clears them only when it is about to make a fresh attempt.</p>
+<h3 id="turning-off-the-safety-net">Turning Off the Safety Net</h3>
+<p><a href="../settings-connect/#debug"><code>Debug</code></a> has two useful values while diagnosing:</p>
+<ul>
+<li><code>1</code> disables the error trapping everywhere, so an error inside <code>Connect</code>, inside the
+  listener, or inside one of your hooks suspends where it happened instead of being
+  reduced to <code>msg</code> or <code>ErrorInfo</code>. This is how to develop a hook.</li>
+<li><code>2</code> stops <code>Connect</code> just before the Conga client is created, which is the moment to
+  inspect the headers, secure parameters, and options that are about to be used.</li>
+</ul>
+<p><code>Debug</code> is a shared field, so setting it affects every instance.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      <div class="left">Made with <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener"><strong>Material for MkDocs</strong></a>.&nbsp;</div><div class="right">Contents copyright &copy;2015-2026 <strong><a href="https://dyalog.com" target="_blank" rel="noopener">Dyalog, LTD</a></strong></div>
+    </div>
+  
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "..", "features": ["navigation.sections", "navigation.instant"], "search": "../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.56ea9cef.min.js"></script>
+      
+        <script src="../js/print-site.js"></script>
+      
+    
+  </body>
+</html>

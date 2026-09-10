@@ -1,0 +1,1573 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="..">
+      
+      
+        <link rel="next" href="../troubleshooting/">
+      
+      
+      <link rel="icon" href="../img/favicon-32.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.15">
+    
+    
+      
+        <title>Usage Guide - WebSocketClient</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.342714a4.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../css/print-site.css">
+    
+      <link rel="stylesheet" href="../css/print-site-material.css">
+    
+      <link rel="stylesheet" href="../css/main.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#the-basic-steps" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="WebSocketClient" class="md-header__button md-logo" aria-label="WebSocketClient" data-md-component="logo">
+      
+  <img src="../img/dyalog-white.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            WebSocketClient
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Usage Guide
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/dyalog/websocketclient" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Dyalog/WebSocketClient
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="WebSocketClient" class="md-nav__button md-logo" aria-label="WebSocketClient" data-md-component="logo">
+      
+  <img src="../img/dyalog-white.svg" alt="logo">
+
+    </a>
+    WebSocketClient
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/dyalog/websocketclient" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Dyalog/WebSocketClient
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Usage Guide
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Usage Guide
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+  
+
+<nav class="md-nav md-nav--secondary" aria-label="On this page">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      On this page
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#the-basic-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      The Basic Steps
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The Basic Steps">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-write-a-function-for-onwsreceive" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Write a function for OnWSReceive.
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-create-an-instance-of-websocketclient" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Create an instance of WebSocketClient.
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-configure-the-instance" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Configure the instance.
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-run-wsconnect" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Run ws.Connect.
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-close-the-websocket" class="md-nav__link">
+    <span class="md-ellipsis">
+      5. Close the WebSocket
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Close the WebSocket">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#closing-from-your-side" class="md-nav__link">
+    <span class="md-ellipsis">
+      Closing from your side
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#closed-by-the-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      Closed by the server
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#connecting-again" class="md-nav__link">
+    <span class="md-ellipsis">
+      Connecting again
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#more-about-onwsreceive" class="md-nav__link">
+    <span class="md-ellipsis">
+      More about OnWSReceive
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="More about OnWSReceive">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#two-things-to-be-careful-about" class="md-nav__link">
+    <span class="md-ellipsis">
+      Two things to be careful about
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#more-about-send" class="md-nav__link">
+    <span class="md-ellipsis">
+      More about Send
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="More about Send">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#text-or-binary" class="md-nav__link">
+    <span class="md-ellipsis">
+      Text or Binary
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#check-the-result" class="md-nav__link">
+    <span class="md-ellipsis">
+      Check the Result
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sending-a-message-in-pieces" class="md-nav__link">
+    <span class="md-ellipsis">
+      Sending a Message in Pieces
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Troubleshooting
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Advanced Usage
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Advanced Usage
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../partial/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Partial Messages
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../secure/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Secure Connections
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../conga/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Conga Usage
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../authentication/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Headers and Authentication
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../proxy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Connecting Through a Proxy
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Reference
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_1" id="__nav_5_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Settings
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_1">
+            <span class="md-nav__icon md-icon"></span>
+            Settings
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../settings-connect/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Connect-related settings
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../settings-proxy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Proxy-related settings
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../settings-conga/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Conga-related settings
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../settings-eventhooks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Event Hook settings
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../settings-websocket/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    WebSocket-specific settings
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../settings-status/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Status-related settings
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../public-methods/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Public Methods
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    About
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            About
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../license/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    License
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../release-notes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Release Notes
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../print_page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Print
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+  
+
+<nav class="md-nav md-nav--secondary" aria-label="On this page">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      On this page
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#the-basic-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      The Basic Steps
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The Basic Steps">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-write-a-function-for-onwsreceive" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Write a function for OnWSReceive.
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-create-an-instance-of-websocketclient" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Create an instance of WebSocketClient.
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-configure-the-instance" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Configure the instance.
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-run-wsconnect" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Run ws.Connect.
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-close-the-websocket" class="md-nav__link">
+    <span class="md-ellipsis">
+      5. Close the WebSocket
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Close the WebSocket">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#closing-from-your-side" class="md-nav__link">
+    <span class="md-ellipsis">
+      Closing from your side
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#closed-by-the-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      Closed by the server
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#connecting-again" class="md-nav__link">
+    <span class="md-ellipsis">
+      Connecting again
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#more-about-onwsreceive" class="md-nav__link">
+    <span class="md-ellipsis">
+      More about OnWSReceive
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="More about OnWSReceive">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#two-things-to-be-careful-about" class="md-nav__link">
+    <span class="md-ellipsis">
+      Two things to be careful about
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#more-about-send" class="md-nav__link">
+    <span class="md-ellipsis">
+      More about Send
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="More about Send">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#text-or-binary" class="md-nav__link">
+    <span class="md-ellipsis">
+      Text or Binary
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#check-the-result" class="md-nav__link">
+    <span class="md-ellipsis">
+      Check the Result
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sending-a-message-in-pieces" class="md-nav__link">
+    <span class="md-ellipsis">
+      Sending a Message in Pieces
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+  <h1>Usage Guide</h1>
+
+<h2 id="the-basic-steps">The Basic Steps</h2>
+<ol>
+<li>Write a function that will be called whenever your WebSocket receives a message - you'll assign the function name to the <code>OnWSReceive</code> setting of your client.</li>
+<li>Create an instance of <code>WebSocketClient</code>.</li>
+<li>Configure the instance.</li>
+<li>Run <code>ws.Connect</code> to connect to the WebSocket server and start listening for messages.</li>
+<li>Close the WebSocket</li>
+</ol>
+<p>Each of these steps is described in more detail below.</p>
+<h3 id="1-write-a-function-for-onwsreceive">1. Write a function for <code>OnWSReceive</code>.</h3>
+<p>A WebSocket exists to deliver messages to you, so the first thing to decide is what your application should do with a message when it arrives. <code>WebSocketClient</code>'s default behavior is to display received messages in the session prefixed by <code>&gt;&gt;&gt;</code> which can be useful when experimenting, but not much use in a real application. Instead you write a "hook" function and assign its name to the <a href="../settings-eventhooks/#onwsreceive"><code>OnWSReceive</code></a> setting. The hook is called on the listener thread for each message segment that arrives, with the client instance as its left argument and <a href="../settings-websocket/#msgstate"><code>MsgState</code></a> - the namespace in which <code>WebSocketClient</code> assembles the incoming message - as its right argument.</p>
+<h3 id="2-create-an-instance-of-websocketclient">2. Create an instance of <code>WebSocketClient</code>.</h3>
+<p>Use the shared <a href="../public-methods/#new"><code>New</code></a> method (<code>ws←WebSocketClient.New args</code>) rather than <code>⎕NEW</code>, because <code>New</code> traps the errors that <code>⎕NEW</code> would signal. <code>args</code> may be:</p>
+<ul>
+<li><code>''</code> - an instance with all settings at their default values.</li>
+<li>a namespace whose variables are the settings to apply, for example <code>(URL:'echo.websocket.org' ⋄ OnWSReceive:'OnMessage')</code>.</li>
+<li>a vector of settings in the positional order<br/><a href="../settings-connect/#url"><code>URL</code></a> <a href="../settings-eventhooks/#onwsreceive"><code>OnWSReceive</code></a> <a href="../settings-eventhooks/#onwsupgrade"><code>OnWSUpgrade</code></a> <a href="../settings-websocket/#protocol"><code>Protocol</code></a> <a href="../settings-connect/#headers"><code>Headers</code></a> <a href="../settings-connect/#params"><code>Params</code></a><br/>for example <code>'echo.websocket.org' 'OnMessage'</code>.</li>
+</ul>
+<p>If construction fails, <code>New</code> returns a namespace reporting the failure instead of an instance, so check its <code>rc</code> or <code>Connected</code> before going on. Setting <a href="../settings-connect/#debug"><code>Debug</code></a> to <code>1</code> has the error signalled instead.</p>
+<h3 id="3-configure-the-instance">3. Configure the instance.</h3>
+<p>Any setting not supplied to <code>New</code> can be assigned directly to the instance at any time before <code>Connect</code> is called. For instance:</p>
+<pre><code>      ws.(URL OnWSReceive)←'wss://echo.websocket.org' 'OnMessage'
+</code></pre>
+<p>The <a href="../public-methods/#config"><code>ws.Config</code></a> method returns a 2-column matrix of every public field and its current value, which is a convenient way to check what you've set.</p>
+<h3 id="4-run-wsconnect">4. Run <code>ws.Connect</code>.</h3>
+<p><a href="../public-methods/#connect"><code>Connect</code></a> initializes Conga if that hasn't happened yet, builds and sends the WebSocket upgrade request from your settings, follows any redirections, and completes the handshake. It returns <code>(rc msg)</code> - <code>0 'Connected'</code> on success - and also leaves the result in the instance's <code>rc</code> and <code>msg</code> fields. On success it starts the listener thread, which sits in a Conga wait loop calling your <code>OnWSReceive</code> hook whenever a message is received until the WebSocket is closed. From then on you can <a href="../public-methods/#send"><code>Send</code></a> messages, and when you're done, <a href="../public-methods/#close"><code>Close</code></a> shuts the WebSocket down and stops the listener.</p>
+<h3 id="5-close-the-websocket">5. Close the WebSocket</h3>
+<p>A WebSocket connection ends in one of two ways - your application closes it, or the
+other end does. Either way the listener thread stops and
+<a href="../settings-status/#connected"><code>Connected</code></a> drops back to <code>0</code>, which is the reliable
+test of whether the WebSocket is still usable. Nothing else announces itself: a
+connection that has gone away does not interrupt your code, and <code>Send</code> simply fails
+rather than signalling an error.</p>
+<pre><code>      ws.Send 'anyone there?'
+¯1 No client connection has been established
+</code></pre>
+<h4 id="closing-from-your-side">Closing from your side</h4>
+<p><a href="../public-methods/#close"><code>Close</code></a> signals the listener thread to stop, closes the
+Conga connection, and clears <a href="../settings-status/#connection"><code>Connection</code></a>:</p>
+<pre><code>      ws.Close
+0 Closed
+</code></pre>
+<p>Like <code>Connect</code>, <code>Close</code> returns <code>(rc msg)</code> and leaves the same pair in the instance's
+<a href="../settings-status/#rc"><code>rc</code></a> and <a href="../settings-status/#msg"><code>msg</code></a> fields. It is safe
+to call more than once - a second call returns <code>0 'Already closed'</code> - and an instance
+that was never connected returns <code>0 'Not listening'</code>.</p>
+<p><code>Close</code> may take up to <a href="../settings-conga/#waittime"><code>WaitTime</code></a> milliseconds (5
+seconds by default) to return, because that is how long the listener can be sitting
+in a Conga <code>Wait</code> before it notices that it has been asked to stop. <code>Close</code> polls for
+<code>WaitTime×1.1</code> milliseconds and then terminates the thread with <code>⎕TKILL</code>, so it
+always returns; if a prompt shutdown matters more to your application than an idle
+listener waking rarely, lower <code>WaitTime</code>.</p>
+<p>Because <code>Close</code> stops the listener directly rather than by way of a Conga <code>Closed</code>
+event, your <a href="../settings-eventhooks/#onclose"><code>OnClose</code></a> hook is <strong>not</strong> called - a
+close you asked for is not news to your application.</p>
+<p>Always close a connection you are finished with. It is tempting to assume that
+expunging the instance is enough - the class has a destructor that closes the
+connection and kills the listener - but the destructor does not run while the
+listener thread is still going, and the listener is what keeps the instance alive.
+Expunging the name therefore leaves you with an orphaned listener: a thread still
+waiting on a live connection, belonging to an instance you no longer have a
+reference to.</p>
+<p>The reference is recoverable. <code>⎕INSTANCES</code> returns every live instance of the class,
+so you can find the orphan and close it properly:</p>
+<pre><code>      ws.Connected
+1
+      ⎕EX 'ws'
+1
+      ⎕TNUMS              ⍝ the listener is still running
+0 1
+      inst←⎕INSTANCES #.WebSocketClient
+      ≢inst
+1
+      (⊃inst).URL
+wss://echo.websocket.org
+      (⊃inst).Close
+0 Closed
+      ⎕TNUMS
+0
+</code></pre>
+<p>Once <code>Close</code> has stopped the listener, nothing is holding the instance any longer and
+it is discarded - the destructor runs, and <code>⎕INSTANCES</code> comes back empty.</p>
+<p>If several instances are live, <code>⎕INSTANCES</code> gives you all of them, so read <code>URL</code> or
+<code>Config</code> to tell them apart - or simply close the lot:</p>
+<pre><code>      {}(⎕INSTANCES #.WebSocketClient).Close
+</code></pre>
+<h4 id="closed-by-the-server">Closed by the server</h4>
+<p>A close can equally come from the other end - the server shutting down, an idle
+timeout, or a proxy dropping the connection. The listener sees Conga's <code>Closed</code>
+event, calls your <code>OnClose</code> hook if you have set one, and then terminates, setting
+<code>Connected</code> to <code>0</code>. The event itself is left in
+<a href="../settings-status/#lastwaitresponse"><code>LastWaitResponse</code></a> for inspection afterwards.</p>
+<p>An application that needs to react to this - to reconnect, to warn the user, to stop
+queueing work that can no longer be sent - either checks <code>Connected</code> before it relies
+on the connection, or sets an <code>OnClose</code> hook:</p>
+<pre><code>     ∇ (rc msg)←client OnClosed waitData
+[1]   ⍝ waitData is Conga's Wait result: (return code) (object name) 'Close' (data)
+[2]    ⎕←'WebSocket to ',client.URL,' was closed by the server'
+[3]    Reconnect←1   ⍝ ... and let the rest of the application know
+[4]    (rc msg)←0 'Closed by server'
+     ∇
+</code></pre>
+<pre><code>      ws.OnClose←'OnClosed'
+</code></pre>
+<p>The hook is called on the listener thread, as <code>OnWSReceive</code> is, so the cautions in
+<a href="#two-things-to-be-careful-about">Two things to be careful about</a> apply to it too:
+keep it short, and trap anything it might signal. <a href="../settings-eventhooks/#onerror"><code>OnError</code></a> is its
+counterpart for a connection that Conga reports an error on - it is called in the
+same way, and the listener ends after it in the same way.</p>
+<p>After the server has closed the connection there is nothing left for <code>Close</code> to do,
+and it reports <code>0 'Already closed'</code>.</p>
+<h4 id="connecting-again">Connecting again</h4>
+<p>A closed instance is not a spent one. Calling <a href="../public-methods/#connect"><code>Connect</code></a>
+again negotiates a fresh connection using the same settings, so an instance can be
+opened and closed as often as your application needs:</p>
+<pre><code>      ws.Close
+0 Closed
+      ws.Connect
+0 Connected
+</code></pre>
+<p><code>Connect</code> clears the status fields before it begins, so anything you want to know
+about the connection that has just ended - <a href="../settings-status/#errorinfo"><code>ErrorInfo</code></a>
+after a listener that stopped on an error, <code>LastWaitResponse</code> after a close - has to
+be read before you reconnect.</p>
+<h2 id="more-about-onwsreceive">More about <code>OnWSReceive</code></h2>
+<p>The functionality of <code>OnWSReceive</code> and the format of the message payload is entirely up to the specifications of your application. Let's say we've connected to a ficticious online chat service where the payload format is JSON and contains the message sender's id and the message they sent - something like <code>{"id":"Daffy","msg":"Quack!"}</code> and you want to display the sender and message to your APL session.</p>
+<pre><code>     ∇ client OnMessage state;json
+[1]   ⍝ state is WebSocketClient's MsgState namespace containing buffer, payload, final, opcode
+[2]   ⍝ client is a reference to the instance in case you need its fields or methods
+[3]   ⍝ Since WebSocketClient reassembles fragmented messages for us, there is
+[4]   ⍝ nothing to do until the message is complete
+[5]    :If state.final
+[6]        :Trap 11 ⍝ in case the message isn't JSON
+[7]            json←⎕JSON state.buffer
+[8]            ⎕←json.id,' says &quot;',json.msg,'&quot;'
+[9]        :Else
+[10]           ⎕←'*** JSON import failed on: &quot;',state.buffer,'&quot;'
+[11]       :EndTrap
+[12]   :EndIf
+     ∇
+</code></pre>
+<p>Since <code>echo.websocket.org</code> simply echoes back what it receives, we can test our hook function...</p>
+<pre><code>      ws←WebSocketClient.New (URL:'echo.websocket.org' ⋄ OnWSReceive:'OnMessage')
+      ws.Connect
+0 Connected
+*** JSON import failed on: &quot;Request served by 4d896d95b55478&quot;
+
+</code></pre>
+<p>The first response from <code>echo.websocket.org</code> is informational and not JSON. But now we can send a JSON payload to <code>echo.websocket.org</code> and it will echo it back...</p>
+<pre><code>      ws.Send ⎕JSON (id:'Daffy' ⋄ msg:'Quack!')
+0
+Daffy says &quot;Quack!&quot;
+      ws.Close
+0 Closed
+
+</code></pre>
+<div class="admonition note">
+<p class="admonition-title">Partial Messages</p>
+</div>
+<p>The WebSocket protocol allows for messages to be sent one or more <em>fragments</em>. See <a href="../partial/">Partial Messages</a> for more information.</p>
+<h3 id="two-things-to-be-careful-about">Two things to be careful about</h3>
+<p><strong>Trap your own errors.</strong> The listener runs the whole of its wait loop inside a single
+error trap, and your <code>OnWSReceive</code> hook runs inside that loop. An error in the hook
+does not suspend the listener thread, but it does end it: the listener records <code>⎕DMX</code>
+in the instance's <code>ErrorInfo</code> field, closes the Conga connection, and sets <code>Connected</code>
+to <code>0</code>. The same applies to an error anywhere else on that thread - in <code>OnClose</code> or
+<code>OnError</code>, in the UTF-8 translation of an incoming message, or in Conga itself.</p>
+<p>So a hook that fails on one awkward message takes the WebSocket down with it, and if
+you want to survive that message you have to trap it yourself:</p>
+<pre><code>     ∇ client OnMessage state
+[1]   :If state.final
+[2]       :Trap 0
+[3]           Handle state.buffer
+[4]       :Else
+[5]           ⎕←'bad message ignored: ',⊃⎕DMX.DM
+[6]       :EndTrap
+[7]   :EndIf
+     ∇
+</code></pre>
+<p>What the trap in the listener buys you is that a failure is reported rather than
+silent. A stopped listener says why:</p>
+<pre><code>      ws.Connected
+0
+      ws.ErrorInfo.EM
+DOMAIN ERROR
+      ws.ErrorInfo.DM
+ DOMAIN ERROR  OnMessage[3] json←⎕JSON state.buffer  ∧
+</code></pre>
+<p><code>ErrorInfo</code> is <code>''</code> until something is caught, and <code>ws.ListenerThread∊⎕TNUMS</code> tells
+you whether the listener is still running. Between them they distinguish the three
+ways a listener can be gone: closed normally by the server, ended by an error with
+<code>ErrorInfo</code> set, or - with <a href="../settings-connect/#debug"><code>Debug</code></a> non-zero, which turns
+the trap off - suspended in the debugger, which is how you want to develop a hook in
+the first place.</p>
+<p><code>MsgState</code> is left exactly as the failing hook saw it, since the reset that normally
+follows a final segment is skipped, so it is worth inspecting alongside <code>ErrorInfo</code>
+when working out what the hook choked on.</p>
+<p><strong>Do not keep the <code>MsgState</code> reference.</strong> It is one namespace reused for every
+message, and <code>WebSocketClient</code> clears it as soon as your hook returns for a final
+segment. A hook that queues the reference for another thread, or stores it for later,
+will find it empty or holding some later message. Copy out what you need:</p>
+<pre><code>[3]        Queue,←⊂state.(buffer opcode)   ⍝ the values, not the namespace
+</code></pre>
+<h2 id="more-about-send">More about <code>Send</code></h2>
+<p><a href="../public-methods/#send"><code>Send</code></a> puts a message on the WebSocket. What the server
+makes of it is between you and the server, but two things are decided by
+<code>WebSocketClient</code>: whether the message goes out as text or as binary, and what you get
+told about it.</p>
+<h3 id="text-or-binary">Text or Binary</h3>
+<p>The WebSocket protocol has two kinds of message, and the datatype of the argument
+chooses between them - character data is sent as a text message (opcode <code>1</code>), integer
+data as a binary one (opcode <code>2</code>):</p>
+<pre><code>      ws.Send 'hello ⍺⍵'      ⍝ text
+0
+      ws.Send 72 73 74        ⍝ binary
+0
+</code></pre>
+<p>There is nothing to set and nothing to encode. Conga translates character data to
+UTF-8 on the way out and back from UTF-8 on the way in, so a message with APL glyphs
+in it needs no special handling at either end.</p>
+<p>Binary data must be integers that fit in a byte. Anything else is refused by Conga
+rather than by <code>WebSocketClient</code>, which is worth recognising when you see it:</p>
+<pre><code>      ws.Send 1.5 2.5
+1004 Conga send failure: 1004
+</code></pre>
+<p>An empty message is legal, and is sent as an empty text message.</p>
+<h3 id="check-the-result">Check the Result</h3>
+<p><code>Send</code> returns <code>(rc msg)</code>, <code>0 ''</code> when the data went out:</p>
+<pre><code>      ws.Send 'hello'
+0
+</code></pre>
+<p>Unlike <a href="../public-methods/#connect"><code>Connect</code></a> and <a href="../public-methods/#close"><code>Close</code></a>,
+<code>Send</code> does <strong>not</strong> leave its result in the instance's <code>rc</code> and <code>msg</code> fields - those
+still describe the last connect or close - so the result has to be taken from <code>Send</code>
+itself:</p>
+<pre><code>      ⎕←(rc msg)←ws.Send payload
+</code></pre>
+<p>The three failures worth handling separately are:</p>
+<table>
+<thead>
+<tr>
+<th>Result</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>¯1 'No client connection has been established'</code></td>
+<td>There is no connection - it was closed, or never made</td>
+</tr>
+<tr>
+<td><code>1004 'Conga send failure: 1004'</code> (any Conga <code>rc</code>)</td>
+<td>Conga refused or could not send the data</td>
+</tr>
+<tr>
+<td><code>¯1 '... occurred trying to send'</code></td>
+<td>An APL error was trapped while sending</td>
+</tr>
+</tbody>
+</table>
+<p>A <code>0</code> from <code>Send</code> means the data reached Conga, not that the server processed it or
+agreed with it - a WebSocket send has no reply. If your protocol has one, it arrives
+later, on the listener thread, through your <code>OnWSReceive</code> hook.</p>
+<h3 id="sending-a-message-in-pieces">Sending a Message in Pieces</h3>
+<p><code>Send</code> takes an optional second element saying whether the data completes the message,
+which lets a large or open-ended message be sent as a sequence of fragments:</p>
+<pre><code>      ws.Send ('part one ' 0)   ⍝ 0 - more to come
+0
+      ws.Send ('part two' 1)    ⍝ 1 - that was the last of it
+0
+</code></pre>
+<p>The receiving end sees one message, <code>'part one part two'</code>. <code>WebSocketClient</code> sets the
+continuation opcodes itself, which is why every fragment of one message has to be of
+the same datatype:</p>
+<pre><code>      ws.Send ('abc' 0)
+0
+      ws.Send (1 2 3) 1
+¯1 Datatype is not the same as previous fragment (1)
+</code></pre>
+<p>Note that the message is still open after that failure - the fragment was rejected,
+not the message. <a href="../partial/#sending-partial-messages">Sending Partial Messages</a>
+covers this, and how to abandon a message you have started, in more detail.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      <div class="left">Made with <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener"><strong>Material for MkDocs</strong></a>.&nbsp;</div><div class="right">Contents copyright &copy;2015-2026 <strong><a href="https://dyalog.com" target="_blank" rel="noopener">Dyalog, LTD</a></strong></div>
+    </div>
+  
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "..", "features": ["navigation.sections", "navigation.instant"], "search": "../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.56ea9cef.min.js"></script>
+      
+        <script src="../js/print-site.js"></script>
+      
+    
+  </body>
+</html>

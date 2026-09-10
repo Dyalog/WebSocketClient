@@ -1,0 +1,1228 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../authentication/">
+      
+      
+        <link rel="next" href="../settings-connect/">
+      
+      
+      <link rel="icon" href="../img/favicon-32.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.15">
+    
+    
+      
+        <title>Connecting Through a Proxy - WebSocketClient</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.342714a4.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../css/print-site.css">
+    
+      <link rel="stylesheet" href="../css/print-site-material.css">
+    
+      <link rel="stylesheet" href="../css/main.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#connecting-through-a-proxy-server" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="WebSocketClient" class="md-header__button md-logo" aria-label="WebSocketClient" data-md-component="logo">
+      
+  <img src="../img/dyalog-white.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            WebSocketClient
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Connecting Through a Proxy
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/dyalog/websocketclient" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Dyalog/WebSocketClient
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="WebSocketClient" class="md-nav__button md-logo" aria-label="WebSocketClient" data-md-component="logo">
+      
+  <img src="../img/dyalog-white.svg" alt="logo">
+
+    </a>
+    WebSocketClient
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/dyalog/websocketclient" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Dyalog/WebSocketClient
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../userguide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Usage Guide
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Troubleshooting
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Advanced Usage
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Advanced Usage
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../partial/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Partial Messages
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../secure/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Secure Connections
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../conga/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Conga Usage
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../authentication/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Headers and Authentication
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Connecting Through a Proxy
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Connecting Through a Proxy
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+  
+
+<nav class="md-nav md-nav--secondary" aria-label="On this page">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      On this page
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#connecting-through-a-proxy-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      Connecting Through a Proxy Server
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Connecting Through a Proxy Server">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-connect-does-differently" class="md-nav__link">
+    <span class="md-ellipsis">
+      What Connect Does Differently
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#authenticating-with-the-proxy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Authenticating With the Proxy
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-two-connections-are-secured-separately" class="md-nav__link">
+    <span class="md-ellipsis">
+      The Two Connections Are Secured Separately
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#when-the-proxy-refuses" class="md-nav__link">
+    <span class="md-ellipsis">
+      When the Proxy Refuses
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Reference
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_1" id="__nav_5_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Settings
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_1">
+            <span class="md-nav__icon md-icon"></span>
+            Settings
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../settings-connect/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Connect-related settings
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../settings-proxy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Proxy-related settings
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../settings-conga/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Conga-related settings
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../settings-eventhooks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Event Hook settings
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../settings-websocket/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    WebSocket-specific settings
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../settings-status/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Status-related settings
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../public-methods/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Public Methods
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    About
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            About
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../license/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    License
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../release-notes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Release Notes
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../print_page/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Print
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+  
+
+<nav class="md-nav md-nav--secondary" aria-label="On this page">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      On this page
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#connecting-through-a-proxy-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      Connecting Through a Proxy Server
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Connecting Through a Proxy Server">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-connect-does-differently" class="md-nav__link">
+    <span class="md-ellipsis">
+      What Connect Does Differently
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#authenticating-with-the-proxy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Authenticating With the Proxy
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-two-connections-are-secured-separately" class="md-nav__link">
+    <span class="md-ellipsis">
+      The Two Connections Are Secured Separately
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#when-the-proxy-refuses" class="md-nav__link">
+    <span class="md-ellipsis">
+      When the Proxy Refuses
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+  <h1>Connecting Through a Proxy</h1>
+
+<h2 id="connecting-through-a-proxy-server">Connecting Through a Proxy Server</h2>
+<p>Many networks do not let an application open an outbound connection directly, and
+require it to go through an HTTP proxy instead. <code>WebSocketClient</code> supports this by
+<em>tunnelling</em>: it connects to the proxy and asks it, with an HTTP <code>CONNECT</code> request, to
+open a connection to the real server on your behalf, and then runs the entire
+WebSocket conversation through the tunnel the proxy hands back.</p>
+<p>Setting <a href="../settings-proxy/#proxyurl"><code>ProxyURL</code></a> turns tunnelling on. All the other proxy-related settings are ignored if
+<code>ProxyURL</code> is empty.</p>
+<pre><code>      ws←WebSocketClient.New ''
+      ws.(URL OnWSReceive)←'wss://echo.websocket.org' 'OnMessage'
+      ws.ProxyURL←'http://proxy.example.com:8080'
+      ws.Connect
+0  Connected
+</code></pre>
+<div class="admonition note">
+<p class="admonition-title">Proxy support relies on Conga version <code>3.4.1626</code> or later.</p>
+</div>
+<h3 id="what-connect-does-differently">What <code>Connect</code> Does Differently</h3>
+<p>When <code>ProxyURL</code> is set, <code>Connect</code> inserts four steps ahead of the handshake it would
+otherwise perform:</p>
+<ol>
+<li>It connects to the host and port in <code>ProxyURL</code> rather than the one in
+   <a href="../settings-connect/#url"><code>URL</code></a>, using TLS if <code>ProxyURL</code> is <code>https:</code>.</li>
+<li>It sends <code>CONNECT host:port HTTP/1.1</code> - the host and port taken from <code>URL</code> - along
+   with <a href="../settings-proxy/#proxyheaders"><code>ProxyHeaders</code></a> and any
+   <code>Proxy-Authorization</code> header it has derived from your settings.</li>
+<li>It waits for the proxy's reply and records it in
+   <a href="../settings-proxy/#proxyresponse"><code>ProxyResponse</code></a>. Anything other than a status of
+   <code>'200'</code> ends the attempt.</li>
+<li>If <code>URL</code> is secure, it starts TLS with the <em>end server</em> over the established
+   tunnel.</li>
+</ol>
+<p>From there the WebSocket upgrade request goes out exactly as it would have done on a
+direct connection, and once the handshake completes the proxy is invisible - <code>Send</code>,
+<code>Close</code>, and your <code>OnWSReceive</code> hook all behave identically.</p>
+<p><strong>Give <code>URL</code> a scheme when you are proxying.</strong> While a direct (non-proxied) connection may not require a <code>wss:</code> or <code>ws:</code> scheme for <code>WebSocketClient</code> to connect, when using a proxy, be sure to supply the scheme in <code>URL</code>.</p>
+<h3 id="authenticating-with-the-proxy">Authenticating With the Proxy</h3>
+<p>Proxy credentials are separate from the credentials the end server sees:
+<a href="../settings-proxy/#proxyauth"><code>ProxyAuth</code></a> and
+<a href="../settings-proxy/#proxyauthtype"><code>ProxyAuthType</code></a> build the <code>Proxy-Authorization</code>
+header on the <code>CONNECT</code> request, while <a href="../settings-connect/#auth"><code>Auth</code></a> and
+<a href="../settings-connect/#authtype"><code>AuthType</code></a> build the <code>Authorization</code> header on the
+WebSocket upgrade request inside the tunnel. Setting one has no effect on the other,
+and an application talking to an authenticated server through an authenticated proxy
+sets all four.</p>
+<p>There are three ways to specify credentials for the proxy. If you specify credentials in more than one way, the order of precedence is as follows:</p>
+<ul>
+<li>Setting <a href="../settings-proxy/#proxyauth"><code>ProxyAuth</code></a> and <a href="../settings-proxy/#proxyauthtype"><code>ProxyAuthType</code></a> takes precedence over</li>
+<li>Setting a <code>Proxy-Authorization</code> header in <code>ProxyHeaders</code> which takes precedence over</li>
+<li>Supplying credentials in the <code>ProxyURL</code>.</li>
+</ul>
+<p><code>ProxyAuth</code> follows the same rules as <code>Auth</code>: given <code>(userid password)</code>, or a string
+containing a <code>:</code>, with <code>ProxyAuthType</code> either empty or case-insensitively matching <code>'basic'</code>, the credentials are
+Base64-encoded for you and <code>ProxyAuthType</code> becomes <code>'Basic'</code>.</p>
+<pre><code>      ws.ProxyURL←'http://proxy.example.com:8080'
+      ws.ProxyAuth←'proxyuser' 'proxypassword'    ⍝ encoded for you as Basic
+</code></pre>
+<p>Credentials can also be embedded in <code>ProxyURL</code> itself, which is convenient when the
+proxy address arrives from a configuration file or an environment variable:</p>
+<pre><code>      ws.ProxyURL←'http://proxyuser:proxypassword@proxy.example.com:8080'
+</code></pre>
+<p>The two are not additive. If <code>ProxyAuth</code> is set it wins, and credentials in the URL
+are ignored; the URL form is used only when <code>ProxyAuth</code> is empty. A
+<code>Proxy-Authorization</code> header you place in <code>ProxyHeaders</code> yourself is likewise
+overwritten by <code>ProxyAuth</code>, though it survives if only the URL form is present.</p>
+<p>Both settings that keep credentials out of your source apply to the proxy as well as
+to the end server:</p>
+<ul>
+<li><a href="../settings-connect/#headersubstitution"><code>HeaderSubstitution</code></a> is applied to the
+  <code>CONNECT</code> request's headers, including the <code>Proxy-Authorization</code> header built from
+  <code>ProxyAuth</code>, so a proxy credential can be held in an environment variable:</li>
+</ul>
+<p><code>ws.HeaderSubstitution←'${' '}'
+        ws.(ProxyAuthType ProxyAuth)←'BEARER' '${PROXY_TOKEN}'</code></p>
+<p>Substitution happens as the request is sent, but the automatic Basic encoding
+  happens earlier, when the header is built - so <code>('${USER}' '${PASS}')</code> would encode
+  the placeholders rather than the values. Use the single-string form, as above, or
+  do the lookup yourself with <a href="../public-methods/#getenv"><code>GetEnv</code></a>.</p>
+<ul>
+<li><a href="../settings-connect/#secret"><code>Secret</code></a> masks <code>ProxyAuth</code> alongside <code>Auth</code> in
+  <code>Config</code>, and masks the <code>Proxy-Authorization</code> header wherever headers are
+  displayed.</li>
+</ul>
+<h3 id="the-two-connections-are-secured-separately">The Two Connections Are Secured Separately</h3>
+<p>There are two independent hops when you tunnel, and it is worth being clear about
+which settings apply to which:</p>
+<table>
+<thead>
+<tr>
+<th>Hop</th>
+<th>Secured when</th>
+<th>Certificate settings used</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>You → proxy</td>
+<td><code>ProxyURL</code> begins <code>https:</code></td>
+<td>None - an anonymous client certificate</td>
+</tr>
+<tr>
+<td>You → end server</td>
+<td><code>URL</code> is secure, or <code>Cert</code>/<code>PublicCertFile</code> is set</td>
+<td><a href="../settings-conga/#cert"><code>Cert</code></a>, <a href="../settings-conga/#sslflags"><code>SSLFlags</code></a>, <a href="../settings-conga/#priority"><code>Priority</code></a>, <a href="../settings-conga/#publiccertfile"><code>PublicCertFile</code></a>, <a href="../settings-conga/#privatekeyfile"><code>PrivateKeyFile</code></a></td>
+</tr>
+</tbody>
+</table>
+<p>So a client certificate is presented to the end server, never to the proxy; there is
+currently no way to authenticate to a proxy with a certificate rather than with
+<code>ProxyAuth</code>. Errors raised while securing the proxy hop are prefixed <code>PROXY:</code> to
+distinguish them from the end-server ones.</p>
+<p>In practice most proxies are addressed as plain <code>http:</code> even when the target is
+<code>wss:</code>, and that is not the weakness it looks like: a <code>CONNECT</code> tunnel is opaque, so
+the TLS session is negotiated end-to-end with the real server through it and the proxy
+sees only encrypted bytes. <code>https:</code> on <code>ProxyURL</code> encrypts the <code>CONNECT</code> request
+itself - which matters mainly because that request carries your proxy credentials.</p>
+<h3 id="when-the-proxy-refuses">When the Proxy Refuses</h3>
+<p>A proxy that declines to open the tunnel answers the <code>CONNECT</code> request with an
+ordinary HTTP response, and <code>Connect</code> leaves the whole of it in <code>ProxyResponse</code> for
+you to look at. This is the first place to check whenever a proxied connection fails
+where a direct one would have worked:</p>
+<pre><code>      ws.Connect
+¯1  Proxy CONNECT response failed, ProxyResponse has the response from the proxy server
+      ws.ProxyResponse.(status message)
+407  Proxy Authentication Required
+      ws.ProxyResponse.headers ws.GetHeader 'Proxy-Authenticate'
+Basic realm=&quot;corporate-proxy&quot;
+</code></pre>
+<p><code>407</code> means the credentials were missing, wrong, or in a scheme the proxy does not
+accept - and, as above, the <code>Proxy-Authenticate</code> header tells you which scheme it
+wants. <code>403</code> usually means the credentials were fine but the proxy's policy forbids
+the destination host or port; many proxies allow <code>CONNECT</code> only to port <code>443</code>, which
+is a common reason for an otherwise correct <code>ws://</code> connection to be refused where
+<code>wss://</code> succeeds.</p>
+<p>Some proxies explain themselves in the response body. When the reply carries a
+<code>Content-Length</code>, <code>Connect</code> reads on for that body and leaves what it gets in
+<code>ProxyResponse.payload</code> - as the enclosed Conga event rather than as text, so the body
+itself is <code>4⊃⊃ws.ProxyResponse.payload</code>.</p>
+<p><code>ProxyResponse</code> is populated whenever the proxy replies at all, successful or not, so
+it is also available for inspection after a connection that worked. It stays <code>''</code> if
+no reply ever arrived.</p>
+<p><strong>The proxy gets one second to reply.</strong> The wait for the <code>CONNECT</code> response is fixed
+at 1000 ms and is not governed by <a href="../settings-conga/#waittime"><code>WaitTime</code></a>. A proxy
+that authenticates against a slow directory service can exceed it, giving
+<code>'Proxy CONNECT wait failed: ...'</code> or, if it answers with something unexpected,
+<code>'Proxy CONNECT did not respond with HTTPHeader event: ...'</code>. Both leave <code>ProxyResponse</code>
+unset, which distinguishes them from a proxy that answered and said no.</p>
+<p>Note also that redirections are followed <em>inside</em> the tunnel. If the end server
+redirects, <code>Connect</code> returns to the start and dials the proxy again for the new <code>URL</code>,
+issuing a fresh <code>CONNECT</code> each time - so <code>MaxRedirections</code> bounds the number of
+<code>CONNECT</code> requests as well.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      <div class="left">Made with <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener"><strong>Material for MkDocs</strong></a>.&nbsp;</div><div class="right">Contents copyright &copy;2015-2026 <strong><a href="https://dyalog.com" target="_blank" rel="noopener">Dyalog, LTD</a></strong></div>
+    </div>
+  
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "..", "features": ["navigation.sections", "navigation.instant"], "search": "../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.56ea9cef.min.js"></script>
+      
+        <script src="../js/print-site.js"></script>
+      
+    
+  </body>
+</html>
