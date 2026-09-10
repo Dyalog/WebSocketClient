@@ -1,0 +1,21 @@
+ r←onEvent wres;obj;evt;data;rc
+ (rc obj evt data)←4↑wres,(≢wres)↓¯1 '???' '???' ''
+ evt←⎕C evt
+ :If evt≢'timeout'
+     :Select ⎕←evt
+     :Case 'error'
+         ∘∘∘
+     :Case 'connect'
+         ⎕←data
+     :Case 'wsupgrade'
+         ⎕←data
+     :Case 'wsreceive'
+         ⎕←data
+     :Case 'close'
+         ⎕←data
+     :Case '???'
+         ∘∘∘
+     :Else
+         ∘∘∘
+     :EndSelect
+ :endif

@@ -1,0 +1,7 @@
+﻿DyalogTest : 0.1
+ID         : WebSocketClientUnit
+Description: Unit tests for WebSocketClient.dyalog
+
+Setup   : setup
+Teardown: teardown
+Test    : test_.*

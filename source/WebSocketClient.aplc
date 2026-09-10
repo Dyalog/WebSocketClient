@@ -1,0 +1,1068 @@
+:Class WebSocketClient
+
+    (⎕ML ⎕IO)←1
+
+    ∇ r←Version
+      :Access public shared
+      r←'WebSocketClient' '0.9.0' '2026-08-24'
+    ∇
+
+    ∇ r←Documentation
+    ⍝ return link to documentation
+      :Access public shared
+      r←'See https://dyalog.github.io/WebSocketClient/'
+    ∇
+
+    ⍝ Connect-related fields
+    :field public URL←''                           ⍝ WebSocket server URL
+    :field public Params←''                        ⍝ request parameters
+    :field public Headers←0 2⍴⊂''                  ⍝ request headers - name, value
+    :field public Auth←''                          ⍝ Credentials: one of '' 'token' ('userid' 'password')
+    :field public AuthType←''                      ⍝ typical values are '', 'BASIC', 'BEARER', 'TOKEN'
+    :field public Origin←'null'                    ⍝ Origin header value
+    :field public HeaderSubstitution←''            ⍝ for injecting environment variables into headers
+    :field public Secret←1                         ⍝ hide credentials in Config
+    :field public AutoUpgrade←1                    ⍝ automatically accept WebSocket upgrade response
+    :field public MaxRedirections←2                ⍝ maximum redirect "hops" that we will follow
+    :field public Shared Debug←0                   ⍝ set to 1 to disable trapping, 2 to stop just before creating client
+
+    ⍝ WebSocket Specific headers
+    :field public Protocol←''                      ⍝ Sec-WebSocket-Protocol header value(s)
+    :field public Extensions←''                    ⍝ Sec-WebSocket-Extensions header value(s)
+    :field public WSUpgradeResponse←''             ⍝ namespace containing the server response to the upgrade request
+
+    ⍝ WebSocket Event Hooks
+    :field public OnWSUpgrade←''                   ⍝ automatic upgrade response
+    :field public OnWSResponse←''                  ⍝ validation of upgrade response
+    :field public OnWSReceive←''                   ⍝ message reception
+    :field public OnClose←''                       ⍝ WebSocket close event
+    :field public OnError←''                       ⍝ WSError event handler
+
+    ⍝ Proxy-related fields - only used if connecting through a proxy server
+    :field public ProxyURL←''                      ⍝ address of the proxy server
+    :field public ProxyAuth←''                     ⍝ authentication string, if any, for the proxy server
+    :field public ProxyAuthType←''                 ⍝ authentication type, if any, for the proxy server
+    :field public ProxyHeaders←0 2⍴⊂''             ⍝ any headers that the proxy server might need
+    :field public ProxyResponse←''                 ⍝ namespace containing the response from proxy server
+    :field public HttpHeaders←''                   ⍝ headers sent back by server on proxy CONNECT
+
+    ⍝ Conga-related fields
+    :field public BufferSize←200000                ⍝ Conga buffersize
+    :field public WaitTime←5000                    ⍝ Timeout in ms on Conga Wait call
+    :field public Cert←⍬                           ⍝ X509 instance if using HTTPS (wss)
+    :field public SSLFlags←32                      ⍝ SSL/TLS flags - 32 = accept cert without checking it
+    :field public Priority←'NORMAL:!CTYPE-OPENPGP' ⍝ GnuTLS priority string
+    :field public PublicCertFile←''                ⍝ if not using an X509 instance, this is the client public certificate file
+    :field public PrivateKeyFile←''                ⍝ if not using an X509 instance, this is the client private key file
+    :field public shared LDRC                      ⍝ WebSocketClient-set reference to Conga after CongaRef has been resolved
+    :field public shared CongaPath←''              ⍝ path to user-supplied conga workspace (assumes shared libraries are in the same path)
+    :field public shared CongaRef←''               ⍝ user-supplied reference to Conga library
+    :field public shared CongaVersion←''           ⍝ set when Conga is initialized
+
+    ⍝ Operational fields
+    :field public readonly shared ValidFormUrlEncodedChars←'&=ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~*+~%'
+
+    ⍝ Status fields
+    :field public rc←¯1
+    :field public msg←''
+    :field public Connection←''
+    :field public LastWaitResponse←''
+    :field public Connected←0
+    :field public Data←''          ⍝ contains data element of LDRC.Wait result if Conga could not parse it as HTTP
+    :field public ErrorInfo←''     ⍝ capture ⎕DMX from errors in Listen
+    :field public HttpStatus←⍬
+    :field public HttpMessage←''
+    :field public HttpVersion←''
+    :field public Redirections←⍬
+    :field public Secure←⍬
+    :field public Host←''
+    :field public Port←⍬
+    :field public Path←''
+    :field public PeerCert←''
+    :field public MsgState         ⍝ namespace containing the current message state
+
+    :field _fragmentType←0         ⍝ datatype (1 or 2) for fragmented messages
+    :field _done←0                 ⍝ flag to indicate to stop Listen
+    :field _listenerThread←⍬       ⍝ thread that Listener is running on
+
+    :property ListenerThread
+    :access public
+        ∇ r←Get
+          r←_listenerThread
+        ∇
+    :endproperty
+
+    ∇ (rc msg)←onWSUpgrade waitData
+    ⍝ waitData is the data element of WebSocket server's response
+    ⍝ parseWSUpgrade parses the data element into HTTP Version, Status, Message, Headers and Payload
+    ⍝ rc should be 0 if the WebSocket is okay to exist, non-0 otherwise
+    ⍝ onWSUpgrade is called when AutoUpgrade=1
+      (rc msg)←0 ''
+      WSUpgradeResponse←parseWSUpgrade waitData
+      :If ~0∊⍴OnWSUpgrade
+          (rc msg)←⎕THIS(##⍎OnWSUpgrade)WSUpgradeResponse
+      :EndIf
+    ∇
+
+    ∇ (rc msg)←onWSResponse waitData
+    ⍝ waitData is the data element of WebSocket server's response
+    ⍝ parseWSUpgrade parses the data element into HTTP Version, Status, Message, Headers and Payload
+    ⍝ rc should be 0 if the WebSocket is okay to exist, non-0 otherwise
+    ⍝ onWSUpgrade is called when AutoUpgrade=0
+      (rc msg)←0 ''
+      WSUpgradeResponse←parseWSUpgrade waitData
+      :If ~0∊⍴OnWSResponse
+          (rc msg)←⎕THIS(##⍎OnWSResponse)WSUpgradeResponse
+      :EndIf
+    ∇
+
+    ∇ onWSReceive waitData;final;opcode;payload
+    ⍝ waitData is the data of the WSReceive event [1] payload [2] final? [3] opcode
+      (payload final opcode)←waitData
+      :If 0≠opcode ⍝ first (or only) frame
+          MsgState.(buffer payload final opcode)←payload payload final opcode
+      :Else ⍝ 0=opcode → continuation frame
+          MsgState.buffer,←payload
+          MsgState.(payload final)←payload final
+      :EndIf  
+
+      :If ~0∊⍴OnWSReceive ⍝ user-defined hook function?
+          ⎕THIS(##⍎OnWSReceive)MsgState
+      :Else ⍝ default behavior
+          :If MsgState.final
+              ⎕←'>>> ',⍕MsgState.buffer
+          :EndIf
+      :EndIf
+     
+      :If MsgState.final ⍝ if final, reset MsgState
+          MsgState.(buffer payload final opcode)←'' '' ¯1 ¯1
+      :EndIf
+    ∇
+
+    ∇ (rc msg)←onClose waitResponse
+    ⍝ waitResponse is [1] Conga return code, [2] Conga object name, [3] Conga event, [4] any data
+      (rc msg)←0 'WebSocket Closed'
+      :If ~0∊⍴OnClose
+          (rc msg)←⎕THIS(##⍎OnClose)waitResponse
+      :EndIf
+    ∇
+
+    ∇ (rc msg)←onError waitResponse
+    ⍝ waitResponse is [1] Conga return code, [2] Conga object name, [3] Conga event, [4] any data
+      (rc msg)←0('WebSocket Error: ',⍕waitResponse)
+      :If ~0∊⍴OnError
+          (rc msg)←⎕THIS(##⍎OnError)waitResponse
+      :EndIf
+    ∇
+
+    ∇ make
+    ⍝ No argument constructor
+      :Access public
+      :Implements constructor
+      makeCommon
+    ∇
+
+    ∇ make1 args;settings;invalid
+    ⍝ Constructor arguments - [URL Protocol OnWSReceive OnWSUpgrade Headers Params]
+      :Access public
+      :Implements constructor
+      :If ~0∊⍴args
+          args←(eis⍣({9.1≠⎕NC⊂,'⍵'}⊃args)⊢args)
+          :Select {⊃⎕NC⊂,'⍵'}⊃args
+          :Case 2.1 ⍝ array
+              (URL OnWSReceive OnWSUpgrade Protocol Headers Params)←6↑args,(⍴args)↓URL OnWSReceive OnWSUpgrade Protocol Headers Params
+          :Case 9.1 ⍝ namespace
+              :If 0∊⍴invalid←(settings←args.⎕NL ¯2.1 ¯9.1)~(⎕NEW⊃⊃⎕CLASS ⎕THIS).⎕NL ¯2.2
+                  args{⍎⍵,'←⍺⍎⍵'}¨settings
+              :Else ⋄ ('Invalid WebSocketClient setting(s): ',,⍕invalid)⎕SIGNAL 11
+              :EndIf
+          :Else ⋄ 'Invalid constructor argument'⎕SIGNAL 11
+          :EndSelect
+      :EndIf
+      makeCommon
+    ∇
+
+    ∇ makeCommon
+      MsgState←(buffer:'' ⋄ payload:'' ⋄ final:¯1 ⋄ opcode:¯1)
+      setDisplayFormat ⎕THIS
+    ∇
+
+    ∇ update arg
+      :Implements Trigger URL, Connected, rc, msg
+      setDisplayFormat ⎕THIS
+    ∇
+
+    ∇ setDisplayFormat ns;conn;url;connected;r;m
+      :Access public
+      r←' rc: ',⍕{6::⍬⊣⎕←'rc missing' ⋄ ⍵.rc}ns
+      m←' msg: ',⍕{6::''⊣⎕←'msg missing' ⋄ ⍵.msg}ns
+      url←{6::''⊣⎕←'URL missing' ⋄ ⍵.URL}ns
+      connected←{6::0⊣⎕←'Connected missing' ⋄ ⍵.Connected}ns
+      conn←' ',(4×connected)↓'Not Connected ',(1+0∊⍴url)⊃((url∨.≠' ')/'to ',∊⍕url)'(no URL specified)'
+      ⎕DF 2⌽' ][',2↓∊' |'∘,¨r m conn
+    ∇
+
+    ∇ Goodbye
+      :Implements destructor
+      {}{0::'' ⋄ LDRC.Names'.'⊣LDRC.Close ⍵}⍣(~0∊⍴Connection)⊢Connection
+      ⎕TKILL _listenerThread
+    ∇
+
+    ∇ r←Config;i;m
+    ⍝ Returns current configuration
+      :Access public
+      r←↑{6::⍵'not set' ⋄ ⍵(⍎⍵)}¨(⎕THIS⍎'⎕NL ¯2.2 ¯2.3')~⊂'ValidFormUrlEncodedChars'
+      :If ∨/m←(≢r)≥i←r[;1]⍳'Auth' 'ProxyAuth'
+      :AndIf Secret
+          r[m/i;2]←⊂'>>> Secret setting is 1 <<<'
+      :EndIf
+    ∇
+
+    ∇ r←Connect
+    ⍝ Attempt to connect
+      :Access public
+      :Trap Debug↓0
+          :If ~0∊⍴Connection ⍝ already have a client?
+          :AndIf {0::0 ⋄ 'Connected'≡2 3⊃LDRC.Describe ⍵}Connection ⍝ Client connected?
+              →0⊣r←(rc msg)←0 'Already connected'
+          :Else
+              reset ⍝ reset all connection-related status
+              r←(rc msg)←connect
+          :EndIf
+      :Else ⍝ :Trap
+          r←(rc msg)←¯1('Unexpected ',⊃{⍺,' at ',⍵}/2↑⎕DMX.DM)
+      :EndTrap
+    ∇
+
+    ∇ reset
+    ⍝ reset settings before connect
+      (rc Connected)←¯1 0
+      HttpStatus←Redirections←Secure←Port←⍬
+      msg←Connection←LastWaitResponse←''
+      Data←ErrorInfo←'' ⍝ Conga's unparsed data, ⎕DMX from errors in Listen
+      HttpVersion←HttpMessage←HttpHeaders←''
+      Host←Path←PeerCert←''
+      WSUpgradeResponse←ProxyResponse←''
+      MsgState.(buffer payload final opcode)←'' '' ¯1 ¯1
+      setDisplayFormat ⎕THIS
+    ∇
+
+
+    ∇ (rc msg)←Send payload;data;fin;type;opcode
+    ⍝ payload is [1] character or sint data {2} final?
+      :Access public
+      (rc msg)←¯1 ''
+      :If 0∊⍴Connection
+          msg←'No client connection has been established'
+      :Else
+          (data fin)←2↑(⊆,payload),1
+          type←2*~isChar data
+     
+          ⍝ _fragmentType either
+          ⍝  =0 - meaning no previous fragment
+          ⍝  ≠0 - meaning it's the datatype of previous fragment(s)
+          :If ~_fragmentType∊0,type
+              →∆END⊣msg←'Datatype is not the same as previous fragment (',(⍕_fragmentType),')'
+          :EndIf
+     
+          :If fin=1 ⍝ if this is the final (or only) fragment
+              opcode←type×_fragmentType=0 ⍝ opcode is type if not a continuation fragment
+              _fragmentType←0
+          :Else ⍝ fin≠1
+              opcode←type×_fragmentType=0
+              _fragmentType←type
+          :EndIf
+     
+          :Trap Debug↓0
+              :If 0≠rc←⊃LDRC.Send Connection(data fin opcode)
+                  msg←'Conga send failure: ',⍕rc
+              :EndIf
+          :Else
+              msg←(⊃⎕DMX.EM),' occurred trying to send'
+          :EndTrap
+      :EndIf
+     ∆END:
+    ∇
+
+    ∇ r←Close;ts
+      :Access public
+      :If 0∊⍴_listenerThread
+          →0⊣r←(rc msg)←0 'Not listening'
+      :EndIf
+     
+      :If _done
+          →0⊣r←(rc msg)←0 'Already closed'
+      :EndIf
+     
+      _done←1  ⍝ signal to listener to terminate
+      ts←⎕AI[3]
+      :While (_listenerThread∊⎕TNUMS)∧⎕AI[3]<ts+WaitTime×1.1
+      :EndWhile
+     
+      :If _listenerThread∊⎕TNUMS
+          ⎕TKILL _listenerThread
+      :EndIf
+      Connection←''
+      r←(rc msg)←0 'Closed'
+    ∇
+
+    ∇ r←New args
+    ⍝ Shared method to create new WebSocketClient
+    ⍝ args - [URL Headers Protocol Cert SSLFlags Priority]
+      :Access public shared
+      :Trap Debug↓0
+          :If 0∊⍴args
+              r←##.⎕NEW ⎕THIS
+          :Else
+              r←##.⎕NEW ⎕THIS(eis⍣(9.1≠nameClass⊃args)⊢args)
+          :EndIf
+          r.(rc msg)←0 'Created'
+      :Else
+          setDisplayFormat r←(rc:-⎕DMX.EN ⋄ msg:⎕DMX.EM ⋄ Connected:0 ⋄ URL:'')
+          →∆EXIT
+      :EndTrap
+     ∆EXIT:
+    ∇
+
+    ∇ r←Init
+      :Access Public
+      :If 0=⊃(rc msg)←Initialize
+          msg←'Initialized'
+      :EndIf
+      r←(rc msg)
+    ∇
+
+    ∇ (rc msg)←Initialize;root;n;congaCopied;class;path;ns;nc;ind
+      (rc msg)←¯1 ''
+      :Hold 'WSClientInit'
+          ⍝↓↓↓ Check if LDRC exists (VALUE ERROR (6) if not), and is LDRC initialized? (NONCE ERROR (16) if not)
+          :If {6 16 999::1 ⋄ ''≡LDRC:1 ⋄ 0⊣LDRC.Describe'.'}''
+              LDRC←''
+              :If ~0∊⍴CongaRef  ⍝ did the user supply a reference to Conga?
+                  :If 0∊⍴LDRC←ResolveCongaRef CongaRef
+                      msg,⍨←'Could not initialize Conga using CongaRef "',(⍕CongaRef),'" due to '
+                      →∆END
+                  :EndIf
+              :Else ⍝ try to find Conga or DRC in ## and #
+                  :For root :In ∪## #
+                      ns←'Conga' 'DRC'
+                      :If ~0∊⍴ind←⍸<\9=nc←⌊root nameClass ns
+                          ns←ind⊃ns
+                          nc←ind⊃nc
+                          :Leave
+                      :EndIf
+                  :EndFor
+     
+                  :If 9=nc ⍝ did we find one?
+                      :If 0∊⍴LDRC←ResolveCongaRef(root⍎ns)
+                          →∆END⊣msg,⍨←'Could not initialize Conga from "',(∊(⍕root)'.'ns),'" due to '
+                      :EndIf
+                      →∆COPY↓⍨{999::0 ⋄ 1⊣LDRC.Describe'.'}'' ⍝ it's possible that Conga was saved in a semi-initialized state
+                  :Else
+     ∆COPY: ⍝ couldn't find a valid Conga namespace, try to copy from the conga workspace
+                      class←⊃⊃⎕CLASS ⎕THIS
+                      :If ~0∊⍴CongaPath
+                          CongaPath←∊1 ⎕NPARTS CongaPath,'/'
+                          →∆END↓⍨0∊⍴msg←(~⎕NEXISTS CongaPath)/'CongaPath "',CongaPath,'" does not exist'
+                          →∆END↓⍨0∊⍴msg←(1≠1 ⎕NINFO CongaPath)/'CongaPath "',CongaPath,'" is not a folder'
+                      :EndIf
+                      congaCopied←0
+                      :For n :In 'Conga' 'DRC'
+                          :For path :In (1+0∊⍴CongaPath)⊃(⊂CongaPath)((dyalogRoot,'ws/')'') ⍝ if CongaPath specifiec, use it exclusively
+                              :Trap Debug↓0
+                                  n class.⎕CY path,'conga'
+                                  LDRC←ResolveCongaRef(class⍎n)
+                                  :If 0∊⍴LDRC
+                                      msg,⍨←n,' was copied from "',path,'conga", but encountered '
+                                      →∆END
+                                  :EndIf
+                                  →∆COPIED⊣congaCopied←1
+                              :EndTrap
+                          :EndFor
+                      :EndFor
+                      →∆END↓⍨0∊⍴msg←(~congaCopied)/'neither Conga nor DRC were successfully copied'
+     ∆COPIED:
+                  :EndIf
+              :EndIf
+          :EndIf
+          CongaVersion←LDRC.Version
+          LDRC.X509Cert.LDRC←LDRC ⍝ reset X509Cert.LDRC reference
+          :If 0≠⊃LDRC.SetProp'.' 'EventMode' 1
+              →∆END⊣msg←'Unable to set EventMode on Conga root'
+          :EndIf
+          :If 0 1≢LDRC.GetProp'.' 'EventMode'
+              →∆END⊣msg←'Conga event mode is not enabled'
+          :EndIf
+          (rc msg)←0 ''
+     ∆END:
+      :EndHold
+    ∇
+
+    ∇ LDRC←ResolveCongaRef CongaRef;failed;z
+    ⍝ Attempt to resolve what CongaRef refers to
+    ⍝ CongaRef can be a charvec, reference to the Conga or DRC namespaces, or reference to an iConga instance
+    ⍝ LDRC is '' if Conga could not be initialized, otherwise it's a reference to the the Conga.LIB instance or the DRC namespace
+     
+      LDRC←'' ⋄ failed←0
+      :Select nameClass CongaRef ⍝ what is it?
+      :Case 9.1 ⍝ namespace?  e.g. CongaRef←DRC or Conga
+     ∆TRY:
+          :Trap Debug↓0
+              :If 2 3≢⌊CongaRef.⎕NC'DllVer' 'Init'
+                  msg←'it does not refer to a valid Conga interface'
+                  →∆EXIT⊣LDRC←''
+              :EndIf
+              :If ∨/'.Conga'⍷⍕CongaRef ⍝ Conga?
+                  LDRC←CongaPath CongaRef.Init'WebSocketClient'
+              :ElseIf 0≡⊃CongaRef.Init CongaPath ⍝ DRC?
+                  LDRC←CongaRef
+              :Else ⍝ should never get to here, but... (paranoia)
+                  msg←'it does not refer to a valid Conga interface'
+                  →∆EXIT⊣LDRC←''
+              :End
+          :Else ⍝ if WebSocketClient is reloaded and re-executed in rapid succession, Conga initialization may fail, so we try twice
+              :If failed
+                  →∆EXIT⊣LDRC←''⊣msg←∊{⍺,(~0∊⍴⍵)/': ',⍵}/⎕DMX.(EM Message)
+              :Else
+                  →∆TRY⊣failed←1
+              :EndIf
+          :EndTrap
+      :Case 9.2 ⍝ instance?  e.g. CongaRef←Conga.Init ''
+          :If 3=⌊|CongaRef.⎕NC⊂'Clt' ⍝ if it looks like a valid Conga reference
+              LDRC←CongaRef ⍝ an instance is already initialized
+          :EndIf
+      :Case 2.1 ⍝ variable?  e.g. CongaRef←'#.Conga'
+          :Trap Debug↓0
+              :If 9≠z←⎕NC⍕CongaRef
+                  →∆EXIT⊣msg←'CongaRef ',(1+z=0)⊃'is invalid' 'was not found'
+              :EndIf
+              LDRC←ResolveCongaRef(⍎∊⍕CongaRef)
+          :Else
+              msg←∊{⍺,(~0∊⍴⍵)/': ',⍵}/⎕DMX.(EM Message)
+          :EndTrap
+      :EndSelect
+     ∆EXIT:
+    ∇
+
+    ∇ (rc secureParams)←CreateSecureParams certs;cert;flags;priority;public;private;nmt;msg;t
+    ⍝ certs is:
+    ⍝ cert     - X509Cert instance or (PublicCertFile PrivateKeyFile)
+    ⍝ flags    - SSL flags
+    ⍝ priority - GnuTLS priority
+    ⍝ public   - PublicCertFile
+    ⍝ private  - PrivateKeyFile
+     
+      certs←,⊆certs
+      (cert flags priority public private)←5↑certs,(≢certs)↓'' 0 'NORMAL:!CTYPE-OPENPGP' '' ''
+     
+      LDRC.X509Cert.LDRC←LDRC ⍝ make sure the X509 instance points to the right LDRC
+     
+      :If 0∊⍴cert ⍝ if X509 (or public private) not supplied
+     ∆CHECK:
+          ⍝ if cert is empty, check PublicCertFile and PrivateKeyFile
+          :If ∨/nmt←(~0∊⍴)¨public private ⍝ either file name not empty?
+              :If ∧/nmt ⍝ if so, both need to be non-empty
+                  :If ∨/t←{0::1 ⋄ ~⎕NEXISTS ⍵}¨public private ⍝ either file not exist?
+                      →∆FAIL⊣msg←'Not found',4↓∊t/'PublicCertFile' 'PrivateKeyFile'{' and ',⍺,' "',(∊⍕⍵),'"'}¨public private
+                  :EndIf
+                  :Trap Debug↓0
+                      cert←⊃LDRC.X509Cert.ReadCertFromFile public
+                  :Else
+                      →∆FAIL⊣msg←'Unable to decode PublicCertFile "',(∊⍕public),'" as certificate'
+                  :EndTrap
+                  cert.KeyOrigin←'DER'private
+              :Else
+                  →∆FAIL⊣msg←(⊃(~nmt)/'PublicCertFile' 'PrivateKeyFile'),' is empty' ⍝ both must be specified
+              :EndIf
+          :Else
+              cert←⎕NEW LDRC.X509Cert
+          :EndIf
+      :ElseIf 2=⍴cert ⍝ 2-element vector of public/private file names?
+          public private←cert
+          →∆CHECK
+      :ElseIf {0::1 ⋄ 'X509Cert'≢{⊃⊢/'.'(≠⊆⊢)⍵}⍕⎕CLASS ⍵}cert
+          →∆FAIL⊣msg←'Invalid certificate parameter'
+      :EndIf
+      secureParams←('x509'cert)('SSLValidation'flags)('Priority'priority)
+      →rc←0
+     ∆FAIL:(rc secureParams)←¯1 msg ⍝ failure
+    ∇
+
+    ∇ (rc msg)←connect;auth;cert;conx;dat;datalen;defaultPort;err;evt;hdrs;headers;host;obj;onwsreceive;onwsupgrade;options;parms;path;port;protocol;rc;secure;secureParams;simpleChar;timedOut;url;urlparms;z;redirections;t;loc;ret;proxied;proxy
+    ⍝ Connect to a WebSocket server
+    ⍝ Result: rc  - 0 means we connected, ≠0 otherwise
+    ⍝         msg - 'Connected' if we connected, something else hopefully explaining what went wrong if connection failed
+     
+      (rc msg)←¯1 'no message yet'
+     
+      URL←,URL
+      parms←Params
+     
+        ⍝ Do some cursory parameter checking
+      →∆END↓⍨0∊⍴msg←'No URL specified'/⍨0∊⍴URL ⍝ exit early if no URL
+      →∆END↓⍨0∊⍴msg←'URL is not a simple character vector'/⍨~isSimpleChar URL
+      →∆END↓⍨0∊⍴msg←'Headers are not character'/⍨(0∊⍴Headers)⍱1↑isChar Headers
+     
+      →∆END↓⍨0∊⍴2⊃(rc msg)←Initialize
+     
+      redirections←0
+     ∆GET:
+     
+    ⍝ do header initialization here because we may return here on a redirect
+      :Trap 7
+          hdrs←makeHeaders Headers
+      :Else
+          →∆END⊣msg←'Improper header format'
+      :EndTrap
+     
+      conx←ConnectionProperties URL
+      →∆END↓⍨0∊⍴msg←conx.msg
+      (protocol secure auth host port path urlparms defaultPort)←conx.(protocol secure auth host port path urlparms defaultPort)
+      secure∨←⍲/{0∊⍴⍵}¨Cert PublicCertFile ⍝ we're also secure if we have a cert or a PublicCertFile
+     
+      :If proxied←~0∊⍴ProxyURL
+          :If CongaVersion(~atLeast)3 4 1626 ⍝ Conga build that introduced proxy support
+              →∆END⊣msg←'Conga version 3.4.1626 or later is required to use a proxy'
+          :EndIf
+          proxy←ConnectionProperties ProxyURL
+          →∆END↓⍨0∊⍴msg←proxy.msg
+          proxy.headers←makeHeaders ProxyHeaders
+      :EndIf
+     
+      (Secure Host Port Path)←secure(lc host)port path
+     
+      hdrs←'Sec-WebSocket-Extensions'(hdrs addHeader)deb Extensions
+      hdrs←'Sec-WebSocket-Protocol'(hdrs addHeader)deb Protocol
+     
+    ⍝ There are several ways to specify credentials and take priority in the following order
+    ⍝ - setting Auth and, optionally, AuthType
+    ⍝ - setting the Authorization header directly
+    ⍝ - providing credentials in the URL wss://userid:password@foo.com
+      :If ~0∊⍴Auth ⍝ is user specified Auth explicitly, use it even if there are credentials in the URL
+          :If (1<|≡Auth)∨':'∊Auth ⍝ (userid password) or userid:password
+          :AndIf ('basic'≡lc AuthType)∨0∊⍴AuthType
+              auth←Base64Encode ¯1↓∊(,⊆Auth),¨':'
+              AuthType←'Basic'
+          :EndIf
+          hdrs←'Authorization'(hdrs setHeader)deb AuthType,' ',⍕auth
+      :ElseIf ~0∊⍴auth
+          hdrs←'Authorization'(hdrs addHeader)auth
+      :EndIf
+     
+      :If proxied
+          :If ~0∊⍴ProxyAuth
+              :If (1<|≡ProxyAuth)∨':'∊ProxyAuth ⍝ (userid password) or userid:password
+              :AndIf ('basic'≡lc ProxyAuthType)∨0∊⍴ProxyAuthType
+                  ProxyAuth←Base64Encode ¯1↓∊(,⊆ProxyAuth),¨':'
+                  ProxyAuthType←'Basic'
+              :EndIf
+              proxy.headers←'Proxy-Authorization'(proxy.headers setHeader)deb ProxyAuthType,' ',⍕ProxyAuth
+          :EndIf
+          :If ~0∊⍴proxy.auth
+              proxy.headers←'Proxy-Authorization'(proxy.headers addHeader)proxy.auth
+          :EndIf
+      :EndIf
+     
+      :If ~0∊⍴parms ⍝ do we have any parameters or a content-type
+              ⍝ params needs to be URLEncoded and will be appended to the query string
+          :If {2≠⎕NC'⍵':0 ⋄ 1≥|≡⍵}parms ⍝ simple vector or scalar and not a reference
+              parms←∊⍕parms       ⍝ deal with possible numeric
+              parms←UrlEncode⍣(~∧/parms∊ValidFormUrlEncodedChars)⊢parms ⍝ URLEncode if necessary
+          :Else ⍝ parms is a namespace or a name/value pairs array
+              parms←UrlEncode parms
+          :EndIf
+          urlparms,←(0∊⍴urlparms)↓'&',parms
+          parms←''
+      :EndIf
+     
+      hdrs⌿⍨←~0∊¨≢¨hdrs[;2] ⍝ remove any headers with empty values
+     
+      secureParams←''
+      :If secure
+      :AndIf 0≠⊃(rc secureParams)←CreateSecureParams Cert SSLFlags Priority PublicCertFile PrivateKeyFile
+          →∆END⊣(rc msg)←rc secureParams
+      :EndIf
+     
+      :If proxied
+          proxy.secureParams←''
+          :If proxy.secure
+          :AndIf 0≠⊃(rc proxy.secureParams)←CreateSecureParams'' 0
+              →∆END⊣(rc msg)←rc('PROXY: ',proxy.secureParams)
+          :EndIf
+      :EndIf
+     
+      stopIf Debug=2
+     
+      options←⊂'Options'(LDRC.Options.DecodeHttp+LDRC.Options.WSAutoUpgrade×AutoUpgrade>proxied)
+     
+    ⍝ Create the client
+      :If ~proxied
+          :If 0≠⊃(err Connection)←2↑rc←LDRC.Clt''host port'http'BufferSize,secureParams,options
+              Connection←''
+              →∆END⊣(rc msg)←err('Conga failed to connect to "',host,'": ',,⍕1↓rc)
+          :EndIf
+      :Else ⍝ proxied
+      ⍝ connect to proxy
+          :If 0≠⊃(err Connection)←2↑rc←LDRC.Clt''proxy.host proxy.port'http'BufferSize proxy.secureParams,options
+              Connection←''
+              →∆END⊣(rc msg)←err('Conga proxy client creation failed ',,⍕1↓rc)
+          :EndIf
+     
+      ⍝ connect to proxied host
+          :If 0≠err←⊃rc←LDRC.Send Connection('CONNECT'(host,':',⍕port)'HTTP/1.1'(environment proxy.headers)'')
+              →∆END⊣(rc msg)←err('Proxy CONNECT failed: ',⍕1↓rc)
+          :EndIf
+     
+          :If 0≠err←⊃rc←LDRC.Wait Connection 1000
+              →∆END⊣(rc msg)←err('Proxy CONNECT wait failed: ',∊⍕1↓rc)
+          :Else
+              (err obj evt dat)←4↑rc
+     
+              :If evt≢'HTTPHeader'
+                  →∆END⊣(rc msg)←¯1('Proxy CONNECT did not respond with HTTPHeader event: ',∊⍕1↓rc)
+              :EndIf
+     
+              ProxyResponse←⎕NS''
+              ProxyResponse.(version status message headers payload)←dat,⊂''
+              :If 0<⊃toInt{0∊⍴⍵:'0' ⋄ ⍵}ProxyResponse.headers GetHeader'Content-Length' ⍝ is there any content?
+                  ProxyResponse.payload←⊂LDRC.Wait Connection 1000 ⍝ capture what should be an HTTPBody response
+              :EndIf
+     
+              :If '200'≢ProxyResponse.status
+                  →∆END⊣(rc msg)←¯1 'Proxy CONNECT response failed, ProxyResponse has the response from the proxy server'
+              :EndIf
+          :EndIf
+     
+      ⍝ if secure, upgrade to SSL
+          :If secure
+              cert←1 2⊃secureParams
+          :AndIf 0≠⊃err←LDRC.SetProp Connection'StartTLS'(cert.AsArg,('SSLValidation' 0)('Address'host))
+              →∆END⊣(rc msg)←err('Proxy failed to upgrade to secure connection: ',∊⍕err)
+          :EndIf
+     
+          :If AutoUpgrade
+          :AndIf 0≠⊃err←LDRC.SetProp Connection'Options'LDRC.Options.(DecodeHttp+WSAutoUpgrade)
+              →∆END⊣(rc msg)←err('Could not set WSAutoUpgrade on proxied connection: ',∊⍕err)
+          :EndIf
+      :EndIf  ⍝ end of proxy stuff
+     
+      ⍝ Request the WebSocket upgrade
+      :If 0≠⊃err←LDRC.SetProp Connection'WSUpgrade'((path,(0∊⍴urlparms)↓'?',urlparms)host(formatHeaders environment hdrs))
+          →∆END⊣(rc msg)←(⊃err)('Conga "WSUpgrade" failed: ',⍕2↓err)
+      :EndIf
+     
+      :If 0≠err←1⊃ret←LDRC.Wait Connection WaitTime
+          msg←'Conga wait error ',,⍕err ⍝ some other error (very unlikely)
+      :EndIf
+     
+      (err obj evt dat)←4↑ret
+      :Select evt
+      :Case 'HTTPHeader' ⍝ should only get this on a redirection
+          :If 1=≡dat
+              →∆END⊣(rc Data msg)←¯1 dat'Conga failed to parse the response HTTP header' ⍝ HTTP header parsing failed?
+          :EndIf
+          (HttpVersion HttpStatus HttpMessage HttpHeaders)←4↑dat
+          HttpStatus←toInt HttpStatus
+     
+          :If ~HttpStatus∊301 302 303 307 308 ⍝ not redirected?
+              →∆END⊣(rc msg)←¯1('Unexpected server response: ',⍕(HttpStatus HttpMessage))
+          :EndIf
+     
+          :If 0∊⍴loc←HttpHeaders GetHeader'location'
+              →∆END⊣(rc msg)←¯1 'Redirection detected without "Location" header'
+          :EndIf
+     
+          redirections+←1
+          :If MaxRedirections<redirections
+              →∆END⊣(rc msg)←¯1('Redirections exceeded maximum (',(⍕MaxRedirections),')')
+          :EndIf
+     
+          Redirections,←t←⎕NS''
+          t.(URL HttpVersion HttpStatus HttpMessage HttpHeaders)←(URL HttpVersion HttpStatus HttpMessage HttpHeaders)
+          URL←loc
+          {}LDRC.Close Connection
+          →∆GET ⍝ try again
+     
+      :Case 'WSUpgrade'  ⍝ when WSAutoUpgrade is enabled
+          →∆END⍴⍨0≠⊃(rc msg)←onWSUpgrade dat
+          _listenerThread←Listen&obj
+          Connected←1
+          msg←'Connected'
+          :If secure
+          :AndIf 0=⊃z←LDRC.GetProp Connection'PeerCert'
+              PeerCert←2⊃z
+          :EndIf
+          →∆EXIT
+     
+      :Case 'WSResponse' ⍝ when WSAutoUpgrade is not enabled (manual checking)
+          :If 0=⊃(rc msg)←onWSResponse dat
+              :If 0≠⊃err←LDRC.SetProp Connection'WSAccept'(dat'')
+                  →∆END⊣(rc msg)←(⊃err)('Conga WSAccept failed: ',⍕err)
+              :EndIf
+          :Else
+              →∆END⍴⍨0≠rc ⍝ exit if onWSReponse failed
+          :EndIf
+     
+          _listenerThread←Listen&obj
+          Connected←1
+          msg←'Connected'
+          :If secure
+          :AndIf 0=⊃z←LDRC.GetProp Connection'PeerCert'
+              PeerCert←2⊃z
+          :EndIf
+          →∆EXIT
+     
+      :Case 'Timeout'
+          →∆END⊣(rc msg)←100 'Conga connection timed out'
+     
+      :Case 'Error'
+          →∆END⊣(rc msg)←(4⊃ret)('Conga error processing your request: ',,⍕ret)
+     
+      :Case 'Closed'
+          msg←'Socket closed by server'
+          :If 0∊⍴HttpStatus
+              rc←4⊃ret ⍝ set return code if closed before receiving HTTPHeader event
+          :EndIf
+          →∆END
+     
+      :Else
+          →∆END⊣msg←'Unhandled Conga event type: ',evt ⍝ This shouldn't happen
+      :EndSelect
+     
+     ∆END:
+      Connection←{0::'' ⋄ ''⊣LDRC.Close ⍵}Connection
+      ⎕TKILL _listenerThread
+      _listenerThread←⍬
+      Connected←0
+     ∆EXIT:
+    ∇
+
+    ∇ Listen conx;rc;obj;evt;data;ret
+      _done←0
+      :While ~_done
+          :Trap Debug↓0
+              ret←LDRC.Wait conx WaitTime
+              :If 'Timeout'≢3⊃ret ⋄ LastWaitResponse←ret ⋄ :EndIf
+              :If 0≠⊃(rc obj evt data)←4↑ret
+                  ⎕←'Conga Wait error: ',⍕ret
+                  →∆END
+              :EndIf
+              :Select evt
+              :Case 'WSReceive'
+                  :If 0 2∊⍨⎕DR 0⍴1⊃data ⍝ character?
+                      data[1]←⊂'UTF-8'⎕UCS ⎕UCS 1⊃data ⍝ WebSocket character data is UTF-8
+                  :EndIf
+                  onWSReceive data
+              :Case 'Closed'
+                  onClose ret
+                  →∆END
+              :Case 'Error'
+                  onError ret
+                  →∆END
+              :Case 'Timeout' ⍝ do nothing
+              :Else
+                  ⎕←'Unhandled Conga event: ',⍕evt
+                  →∆END
+              :EndSelect
+          :Else ⍝ :Trap
+              ErrorInfo←⎕DMX ⍝ capture error information
+              _done←1 ⍝ stop listening
+          :EndTrap
+      :EndWhile
+      :Trap 0 ⋄ {}LDRC.Close conx ⋄ :EndTrap
+     ∆END:
+      (_done Connected)←1 0
+    ∇
+
+    NL←⎕UCS 13 10
+    lc←¯3∘⎕C ⍝ lower case conversion
+    uc←1∘⎕C  ⍝ upper case conversion
+    ci←{⍺ ⍺⍺⍥lc ⍵} ⍝ case insensitive operator
+    deb←' '∘(1↓,(/⍨)1(⊢∨⌽)0,≠) ⍝ delete extraneous blanks
+    dlb←{(+/∧\' '=⍵)↓⍵} ⍝ delete leading blanks
+    iotaz←((≢⊣)(≥×⊢)⍳)
+    nameClass←{⍺←⎕THIS ⋄ ⍺.⎕NC⊂,'⍵'} ⍝ name class of argument
+    splitOnN←{(≢⍺⍺)↓¨t⊆⍨(1+⍵⍵)⌊+\⍺⍺⍷t←⍺⍺,⍵} ⍝ (' ' splitOnN 2) 'this is a test' →→ 'this' 'is' 'a test'
+    splitOnFirst←{(⍺↑⍨¯1+p)(⍺↓⍨p←⌊/⍺⍳⍵)} ⍝ split ⍺ on first occurrence of ⍵ (removing first ⍵)
+    splitOn←(~∊)⊆⊣ ⍝ split ⍺ on all ⍵ (removing ⍵)
+    toInt←{0∊⍴⍵:⍬ ⋄ ~3 5∊⍨10|⎕DR t←1⊃2⊃⎕VFI⍕⍵:⍬ ⋄ t≠⌊t:⍬ ⋄ t} ⍝ simple char to int
+    getHeader←{⍺{1<|≡⍵:⍺∘∇¨⍵ ⋄ (⍺[;2],⊂'∘???∘')⊃⍨⍺[;1](⍳ci)⊆,⍵}⍵} ⍝ return header value(s) or '∘???∘' if not found
+    beginsWith←{∧/⍵=⍺↑⍨≢⍵}
+    isChar←{1≥|≡⍵:0 2∊⍨10|⎕DR{⊃⍣(0∊⍴⍵)⊢⍵}⍵ ⋄ ∧/∇¨⍵}
+    isSimpleChar←{1≥|≡⍵:isChar ⍵ ⋄ 0}
+    stopIf←{1∊⍵:-⎕TRAP←0 'C' '⎕←''Stopped for debugging... (Press Ctrl-Enter)''' ⋄ shy←0} ⍝ faster alternative to setting ⎕STOP
+    atLeast←{a←(≢⍵)↑⍺ ⋄ ⊃((~∧\⍵=a)/a>⍵),1} ⍝ checks if ⍺ is at least version ⍵
+
+    ∇ r←parseWSUpgrade dat;car;cdr;h;version;status;message;payload;headers
+    ⍝ parses the data component of the WSUpgrade/WSResponse events (it's just a typical HTTP response)
+      (car cdr)←(NL splitOnN 1)dat ⍝ split off the status line from the rest (yes, car and cdr are a LISP homage)
+      (version status message)←(' 'splitOnN 2)car ⍝ split into HTTP version, HTTP status, HTTP message
+      status←toInt status ⍝ status is a number
+      (h payload)←((NL,NL)splitOnN 1)cdr ⍝ split headers from payload
+      headers←dlb¨↑(':'splitOnN 1)¨h splitOn NL ⍝ split each header on first ':'
+      r←⎕NS'version' 'status' 'message' 'headers' 'payload'
+    ∇
+
+    ∇ r←makeHeaders w
+      r←{
+          0::¯1            ⍝ any error
+          ¯1∊⍵:⍵
+          0∊⍴⍵:0 2⍴⊂''     ⍝ empty
+          1≥|≡⍵:∇{         ⍝ simple array
+              2=⍴⍵:1⊂⍵     ⍝ degenerate case of scalar name and value ('n' 'v' ≡ 'nv')
+              dlb¨¨((,⍵)((~∊)⊆⊣)NL)splitOnFirst¨':'
+          }⍵
+          2=⍴⍴⍵:{          ⍝ matrix
+              0∊≢¨⍵[;1]:¯1 ⍝ no empty names
+              0 1 1/0,,¨⍵  ⍝ ensure it's 2 columns
+          }⍵
+          3=|≡⍵:∇{         ⍝ depth 3
+              2|≢⊃,/⍵:¯1   ⍝ ensure an even number of element
+              ↑⍵
+          }(eis,)¨⍵
+          2=|≡⍵:∇{
+              ∧/':'∊¨⍵:⍵ splitOnFirst¨':'
+              ((0.5×⍴⍵),2)⍴⍵
+          }⍵
+          ¯1
+      }w
+      'Invalid Headers format'⎕SIGNAL 7/⍨r≡¯1
+    ∇
+
+    ∇ r←GetEnv var
+    ⍝ return enviroment variable setting for var
+      :Access public shared
+      r←2 ⎕NQ'.' 'GetEnvironment'var
+    ∇
+
+    ∇ r←dyalogRoot
+    ⍝ return path to interpreter
+      r←{⍵,('/\'∊⍨⊢/⍵)↓'/'}{0∊⍴t←GetEnv'DYALOG':⊃1 ⎕NPARTS⊃2 ⎕NQ'.' 'GetCommandLineArgs' ⋄ t}''
+    ∇
+
+    ∇ ns←ConnectionProperties url;p;defaultPort;ind;msg;protocol;secure;auth;host;port;path;urlparms
+    ⍝ return namespace of connection properties based on parsing the supplied URL
+      ns←⎕NS''
+      msg←''
+      (protocol secure host path urlparms)←parseURL url
+     
+      :If ~(⊂protocol)∊'' 'ws:' 'wss:' 'http:' 'https:'
+          →∆END⊣msg←'Invalid protocol: ',¯1↓protocol
+      :EndIf
+     
+      auth←''
+      :If 0≠p←¯1↑⍸host='@' ⍝ Handle user:password@host...
+          auth←('Basic ',(Base64Encode(p-1)↑host))
+          host←p↓host
+      :EndIf
+     
+    ⍝ This next section is a chicken and egg scenario trying to figure out
+    ⍝ whether to use HTTPS as well as what port to use
+     
+      :If defaultPort←(≢host)<ind←host⍳':' ⍝ then if there's no port specified in the host
+          port←(1+secure)⊃80 443 ⍝ use the default HTTP/HTTPS port
+      :Else
+          :If 0=port←⊃toInt ind↓host
+              →∆END⊣msg←'Invalid host/port: ',host
+          :EndIf
+          host↑⍨←ind-1
+      :EndIf
+     
+      :If 0∊⍴host
+          →∆END⊣msg←'No host specified'
+      :EndIf
+     
+      :If ~(port>0)∧(port≤65535)∧port=⌊port
+          →∆END⊣msg←'Invalid port: ',⍕port
+      :EndIf
+     
+      secure∨←(0∊⍴protocol)∧port=443 ⍝ if just port 443 was specified, without any protocol, use SSL
+     
+      :If defaultPort∧secure
+          port←443
+      :EndIf
+     
+      ns.(protocol secure auth host port path urlparms defaultPort)←protocol secure auth host port path urlparms defaultPort
+     
+     ∆END:
+      ns.msg←msg
+    ∇
+
+    ∇ (protocol secure host path urlparms)←parseURL url;path;p;ind
+    ⍝ Parses a URL and returns
+    ⍝   protocol -  protocol (http, https, ws, wss)
+    ⍝   secure - Boolean whether running HTTPS or not based on leading http://
+    ⍝   host - domain or IP address
+    ⍝   path - path on the host for the requested resource, if any
+    ⍝   urlparms - URL query string, if any
+      (url urlparms)←2↑(url splitOnFirst'?'),⊂''
+      p←⍬⍴2+⍸<\'://'⍷url
+      protocol←lc(0⌈p-2)↑url
+      secure←∨/protocol∘beginsWith¨'wss:' 'https:'
+      url←p↓url                          ⍝ Remove HTTP[s]:// if present
+      (host path)←url splitOnFirst'/'    ⍝ Extract host and path from url
+      ind←host iotaz'@'                  ⍝ any credentials?
+      host←(ind↑host),lc ind↓host        ⍝ host (domain) is case-insensitive (credentials are not)
+      path←'/',∊(⊂'%20')@(=∘' ')⊢path    ⍝ convert spaces in path name to %20
+    ∇
+
+    ∇ {r}←{name}AddHeader value;hdrs
+    ⍝ add a header unless it's already defined
+      :Access public
+      :If 0=⎕NC'name' ⋄ (name value)←(⊃value)(1↓value) ⋄ :EndIf
+      :Trap 7
+          r←Headers←name(Headers addHeader)value
+      :Else
+          ⎕EM ⎕SIGNAL ⎕EN
+      :EndTrap
+    ∇
+
+    ∇ value←{hdrs}GetHeader name
+    ⍝ retrieve a header value
+      :Access public
+      hdrs←{6::⍵ ⋄ hdrs}Headers
+      value←('∘???∘'∘≢⊢⍤/⊢)hdrs getHeader name
+    ∇
+
+    ∇ hdrs←name(hdrs addHeader)value
+    ⍝ add a header unless it's already defined
+      hdrs←makeHeaders hdrs
+      :If ~0∊⍴value
+          hdrs⍪←('∘???∘'≡hdrs getHeader name)⌿⍉⍪name value
+      :EndIf
+    ∇
+
+    ∇ {r}←{name}SetHeader value;ind
+    ⍝ set a header value, overwriting any existing one
+      :Access public
+      :If 0=⎕NC'name' ⋄ (name value)←(⊃value)(1↓value) ⋄ :EndIf
+      :Trap 7
+          r←Headers←name(Headers setHeader)value
+      :Else
+          ⎕EM ⎕SIGNAL ⎕EN
+      :EndTrap
+    ∇
+
+    ∇ hdrs←name(hdrs setHeader)value;ind
+      hdrs←makeHeaders hdrs
+      ind←hdrs[;1](⍳ci)eis name
+      hdrs↑⍨←ind⌈≢hdrs
+      hdrs[ind;]←name(⍕value)
+    ∇
+
+    ∇ {r}←RemoveHeader name
+    ⍝ remove a header
+      :Access public
+      :Trap 7
+          Headers←makeHeaders Headers
+      :Else
+          ⎕EM ⎕SIGNAL ⎕EN
+      :EndTrap
+      Headers⌿⍨←Headers[;1](≢¨ci)eis name
+      r←Headers
+    ∇
+
+    ∇ r←formatHeaders hdrs
+      r←2↓∊((⊂NL)':'),¨⍤1⊢hdrs
+    ∇
+
+    ∇ hdrs←environment hdrs;beg;end;escape;hits;regex
+    ⍝ substitute any header names or values that begin with '$env:' with the named environment variable
+      :If ~0∊⍴HeaderSubstitution
+          (beg end)←2⍴HeaderSubstitution
+          escape←'.^$*+?()[]{\|-'∘{m←∊(1+⍺∊⍨t←⌽⍵)↑¨1 ⋄ t←m\t ⋄ t[⍸~m]←'\' ⋄ ⌽t} ⍝ chars that need escaping in regex
+          regex←(escape beg),'[[:alpha:]].*?',escape end
+          hdrs←(⍴hdrs)⍴regex ⎕R{0∊⍴e←GetEnv(≢beg)↓(-≢end)↓⍵.Match:⍵.Match ⋄ e}⊢,hdrs
+      :EndIf
+    ∇
+
+    ∇ hdrs←privatize hdrs
+    ⍝ suppress displaying Authorization header value if Private=1
+      :If Secret
+          hdrs[⍸hdrs[;1](∊ci)'Authorization' 'Proxy-Authorization';2]←⊂'>>> Secret setting is 1 <<<'
+      :EndIf
+    ∇
+
+    ∇ r←{a}eis w;f
+    ⍝ enclose if simple
+      f←{⍺←1 ⋄ ,(⊂⍣(⍺=|≡⍵))⍵}
+      :If 0=⎕NC'a' ⋄ r←f w
+      :Else ⋄ r←a f w
+      :EndIf
+    ∇
+
+      base64←{(⎕IO ⎕ML)←0 1            ⍝ from dfns workspace - Base64 encoding and decoding as used in MIME.
+          chars←'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
+          bits←{,⍉(⍺⍴2)⊤⍵}             ⍝ encode each element of ⍵ in ⍺ bits, and catenate them all together
+          part←{((⍴⍵)⍴⍺↑1)⊂⍵}          ⍝ partition ⍵ into chunks of length ⍺
+          0=2|⎕DR ⍵:2∘⊥∘(8∘↑)¨8 part{(-8|⍴⍵)↓⍵}6 bits{(⍵≠64)/⍵}chars⍳⍵  ⍝ decode a string into octets
+          four←{                       ⍝ use 4 characters to encode either
+              8=⍴⍵:'=='∇ ⍵,0 0 0 0     ⍝   1,
+              16=⍴⍵:'='∇ ⍵,0 0         ⍝   2
+              chars[2∘⊥¨6 part ⍵],⍺    ⍝   or 3 octets of input
+          }
+          cats←⊃∘(,/)∘((⊂'')∘,)        ⍝ catenate zero or more strings
+          cats''∘four¨24 part 8 bits ⍵
+      }
+
+    ∇ r←{cpo}Base64Encode w
+    ⍝ Base64 Encode
+    ⍝ Optional cpo (code points only) suppresses UTF-8 translation
+    ⍝ if w is integer skip any conversion
+      :Access public shared
+      :If (⎕DR w)∊83 163 ⋄ r←base64 w
+      :ElseIf 0=⎕NC'cpo' ⋄ r←base64'UTF-8'⎕UCS w
+      :Else ⋄ r←base64 ⎕UCS w
+      :EndIf
+    ∇
+
+    ∇ r←{cpo}Base64Decode w
+    ⍝ Base64 Decode
+    ⍝ Optional cpo (code points only) suppresses UTF-8 translation
+      :Access public shared
+      :If 0=⎕NC'cpo' ⋄ r←'UTF-8'⎕UCS base64 w
+      :Else ⋄ r←⎕UCS base64 w
+      :EndIf
+    ∇
+
+    ∇ r←{name}UrlEncode data;⎕IO;format;noname;xlate;hex
+    ⍝ data is one of:
+    ⍝      - a simple character vector (no name supplied)
+    ⍝      - an even number of name/data character vectors
+    ⍝       'name' 'fred' 'type' 'student' > 'name=fred&type=student'
+    ⍝      - a namespace containing variable(s) to be encoded
+    ⍝ r    is a character vector of the URLEncoded data
+     
+      :Access Public Shared
+      ⎕IO←0
+      format←{
+          1=≡⍵:⍺(,⍕⍵)
+          ↑⍺∘{⍺(,⍕⍵)}¨⍵
+      }
+      :If 0=⎕NC'name' ⋄ name←'' ⋄ :EndIf
+      noname←0
+      :If 9.1=⎕NC⊂'data'
+          data←⊃⍪/{0∊⍴t←⍵.⎕NL ¯2:'' ⋄ ⍵{⍵ format ⍺⍎⍵}¨t}data
+      :Else
+          :Select |≡data
+          :CaseList 0 1
+              :If 1≥|≡data
+                  noname←0∊⍴name
+                  data←name(,data)
+              :EndIf
+          :Case 3 ⍝ nested name/value pairs (('abc' '123')('def' '789'))
+              data←⊃,/data
+          :EndSelect
+      :EndIf
+      hex←'%',¨,∘.,⍨⎕D,6↑⎕A
+      xlate←{
+          i←⍸~⍵∊'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.~*'
+          0∊⍴i:⍵
+          ∊({⊂∊hex['UTF-8'⎕UCS ⍵]}¨⍵[i])@i⊢⍵
+      }
+      data←xlate∘⍕¨data
+      r←noname↓¯1↓∊data,¨(⍴data)⍴'=&'
+    ∇
+
+:EndClass
+

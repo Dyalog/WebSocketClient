@@ -1,0 +1,9 @@
+test
+'Conga' ⎕CY 'conga'
+s←wss.New ''
+s.OnWSUpgrade←'onEvent'
+s.OnConnect←'onEvent'
+s.OnWSReceive←'onEvent'
+s.OnClose←'onEvent'
+s.OnTimeout←'onEvent'
+s.Start

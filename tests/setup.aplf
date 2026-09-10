@@ -1,0 +1,15 @@
+r←setup dummy;home
+⍝ setup WebSocketClient test environment
+(⎕IO ⎕ML)←1
+r←''
+ :Trap 0
+     :If 0=##.⎕NC'TESTSOURCE'
+         home←SourceFolder⊃⎕SI
+     :Else
+         home←##.TESTSOURCE
+     :EndIf
+     {}#.⎕FIX'file://',home,'../Source/WebSocketClient.aplc'
+     {}#.⎕FIX'file://',home,'/wss.aplc'
+ :Else
+     r←,⍕⎕DM
+ :EndTrap

@@ -1,0 +1,4 @@
+msg←test_init;wsc;rc
+wsc←#.WebSocketClient.New ''
+(rc msg)←wsc.Init
+msg←(0≠rc)/msg
