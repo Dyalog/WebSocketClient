@@ -20,5 +20,5 @@
   "source": "source/WebSocketClient.aplc",
   "tags": "mac-os,windows,linux,websocket,dyalog,pi",
   "userCommandScript": "",
-  "version": "1.0.0"
+  "version": "1.0.1"
 }

@@ -4,7 +4,7 @@
 
     ∇ r←Version
       :Access public shared
-      r←'WebSocketClient' '0.9.0' '2026-08-24'
+      r←'WebSocketClient' '1.0.1' '2026-10-03'
     ∇
 
     ∇ r←Documentation
@@ -124,8 +124,8 @@
       :Else ⍝ 0=opcode → continuation frame
           MsgState.buffer,←payload
           MsgState.(payload final)←payload final
-      :EndIf  
-
+      :EndIf
+     
       :If ~0∊⍴OnWSReceive ⍝ user-defined hook function?
           ⎕THIS(##⍎OnWSReceive)MsgState
       :Else ⍝ default behavior
@@ -183,7 +183,8 @@
     ∇
 
     ∇ makeCommon
-      MsgState←(buffer:'' ⋄ payload:'' ⋄ final:¯1 ⋄ opcode:¯1)
+      MsgState←⎕NS'' ⋄ MsgState.(buffer payload final opcode)←'' '' ¯1 ¯1
+      ⍝v20 MsgState←(buffer:'' ⋄ payload:'' ⋄ final:¯1 ⋄ opcode:¯1)
       setDisplayFormat ⎕THIS
     ∇
 
@@ -318,7 +319,9 @@
           :EndIf
           r.(rc msg)←0 'Created'
       :Else
-          setDisplayFormat r←(rc:-⎕DMX.EN ⋄ msg:⎕DMX.EM ⋄ Connected:0 ⋄ URL:'')
+          r←⎕NS'' ⋄ r.(rc msg Connected URL)←(-⎕DMX.EN)⎕DMX.EM 0 ''
+          ⍝v20 r←(rc:-⎕DMX.EN ⋄ msg:⎕DMX.EM ⋄ Connected:0 ⋄ URL:'')
+          setDisplayFormat r
           →∆EXIT
       :EndTrap
      ∆EXIT:
@@ -1065,4 +1068,3 @@
     ∇
 
 :EndClass
-
